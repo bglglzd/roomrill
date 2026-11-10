@@ -1197,26 +1197,33 @@ main:focus {
     flex-shrink:0
   }
   .room-toolbar {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
     align-items:flex-start;
-    gap:18px;
+    gap:12px;
     padding-top:24px;
     padding-bottom:20px
   }
   .room-picker select {
     font-size:25px;
-    max-width:190px
+    max-width:none;
+    width:100%
   }
   .clock {
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:baseline;
+    text-align:left;
     padding-top:2px;
-    max-width:142px;
+    max-width:none;
     gap:6px
   }
   .clock .eyebrow {
     font-size:8px
   }
   .clock time {
-    font-size:9px;
-    max-width:126px;
+    font-size:10px;
+    max-width:none;
     line-height:1.6
   }
   .room-panel,.delivery-panel,.leases-panel,.evidence-panel {

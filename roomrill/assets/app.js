@@ -208,7 +208,7 @@
         setText("draft-feedback", error.message);
         $("draft-feedback").classList.add("error-text");
       } else showError(error.message);
-      if (error.status === 403) {
+      if (error.status === 403 || error.code === "token_refused") {
         setConnection(false, "The local session changed. Reconnecting before enabling controls. Review fresh state before retrying the action.");
         ui.token = null;
       }
@@ -291,6 +291,7 @@
         no_eligible_lease: "No eligible lease.",
       };
       setText(`${scope}-reason`, slot.reason ? (reasons[slot.reason] || capital(slot.reason)) : "No decision reason supplied.");
+      $(`${scope}-reason`).hidden = !winner;
       const ownership = slot.ownership;
       setText(`${scope}-ownership`, ownership ? `Owned by ${ownership.lease_id}. ${ownership.restore_policy === "compare" ? "Guarded restore" : "Leave state"}; acknowledged version ${ownership.last_version}.` : "No automatic ownership.");
     }
