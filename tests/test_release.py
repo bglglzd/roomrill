@@ -112,6 +112,7 @@ class SourceSnapshotTests(unittest.TestCase):
             '[build-system]\nrequires=["unaccepted-backend"]\n'
             'build-backend="setuptools.build_meta"\n',
             encoding="utf-8",
+            newline="\n",
         )
         self.commit()
         output = self.path / "candidate"
