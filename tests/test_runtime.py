@@ -11,6 +11,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 from roomrill.demo import recording, request
 from roomrill.engine import Engine
@@ -25,6 +26,30 @@ class DurableRuntime(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.path = self.root / "ledger.sqlite"
+
+    def test_command_history_uses_creation_order_instead_of_identifier_order(self):
+        engine = Engine(self.path)
+        engine.initialize(demo=True)
+        serial = [9999]
+
+        def descending_id(prefix):
+            serial[0] -= 1
+            return f"{prefix}-{serial[0]}"
+
+        with patch("roomrill.engine.fresh_id", side_effect=descending_id):
+            for index in range(6):
+                engine.create(
+                    request(
+                        f"lease-{index}",
+                        priority=index,
+                        targets={"light": {"on": True, "brightness": index + 10}},
+                    )
+                )
+        reopened = Engine(self.path).state()
+        self.assertEqual(
+            [command["lease_id"] for command in reopened["commands"]],
+            [f"lease-{index}" for index in reversed(range(6))],
+        )
 
     def test_manual_override_and_expiry_do_not_cross_room_boundaries(self):
         engine = Engine(self.path)

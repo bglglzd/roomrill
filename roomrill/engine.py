@@ -663,7 +663,19 @@ class Engine:
                 )
             rooms.append(room)
         out["rooms"] = rooms
-        out["commands"] = list(out["commands"].values())[-100:][::-1]
+        queued = {
+            entry["command_id"]: entry["sequence"]
+            for entry in state["events"]
+            if entry["kind"] == "command_queued"
+        }
+        require(
+            set(out["commands"]) <= set(queued),
+            "integrity",
+            "Command history has no ordering proof; preserve the file",
+        )
+        out["commands"] = sorted(
+            out["commands"].values(), key=lambda command: queued[command["id"]], reverse=True
+        )[:100]
         out["events"] = out["events"][-100:][::-1]
         out["scope"] = "SQLite-local synthetic device CAS; no hardware actuation"
         return out

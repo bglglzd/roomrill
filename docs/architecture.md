@@ -29,7 +29,7 @@ Ownership stores the original baseline, last acknowledged state/version, decidin
 
 ## Persistence and boundaries
 
-`store.py` keeps one checksummed JSON snapshot in a versioned SQLite database. Short explicit transactions serialize competing writers; simulated device CAS and controller state commit together. This is deliberately a **simulator-local guarantee**, not a distributed hardware protocol. The engine preserves prior command receipts and events. State views show the latest 100 commands/events; stored history is retained.
+`store.py` keeps one checksummed JSON snapshot in a versioned SQLite database. Short explicit transactions serialize competing writers; simulated device CAS and controller state commit together. This is deliberately a **simulator-local guarantee**, not a distributed hardware protocol. The engine preserves prior command receipts and events. State views show the latest 100 commands by queue sequence and the latest 100 events; stored history is retained. Identifier spelling does not determine chronology.
 
 Each transaction checks SQLite format/integrity and the snapshot checksum. Checksums detect accidental corruption; they do not authenticate an attacker controlling the file. Snapshot validation, encoding and retained history cost grow with ledger size. This version has no migration, retention, encryption, multi-tenant or large-installation claim.
 

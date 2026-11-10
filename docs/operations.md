@@ -14,6 +14,8 @@ roomrill --db work.sqlite serve
 
 These are real simulator operations using current UTC time. `init` refuses an existing file. Operational `serve` reconciles roughly once per second; OS scheduling and SQLite work add overhead. It is not a hard real-time controller. Stop the owned server with Ctrl+C. No service is installed.
 
+Continuous expiry handling requires `serve` to remain running. Individual CLI commands leave no background scheduler. After downtime, `reconcile` or the serving loop evaluates current eligibility; a read-only `state` command does not apply device changes.
+
 `roomrill demo --serve` instead uses a labelled synthetic clock, seeded request and `.roomrill/demo.sqlite`. Rerunning resumes the ledger. Choose a new path with `roomrill --db fresh-demo.sqlite demo --serve`; nothing is deleted. The initial request lasts 1,200 fixture seconds. Apply a manual light value, then advance time to observe its preservation and media closure.
 
 ## Commands and recovery
