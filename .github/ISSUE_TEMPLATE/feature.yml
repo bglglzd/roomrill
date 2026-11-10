@@ -1,0 +1,15 @@
+name: Feature request
+description: Describe a concrete room-state workflow.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Workflow and current limitation
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected behavior and failure recovery
+    validations:
+      required: true

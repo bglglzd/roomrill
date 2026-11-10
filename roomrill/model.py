@@ -95,13 +95,13 @@ def propose(text, *, endpoint, model, rooms, key_env=None, deadline_seconds=45):
     require(
         type(deadline_seconds) is int and 1 <= deadline_seconds <= 45,
         "invalid_input",
-        "Model deadline must be1..45seconds",
+        "Model deadline must be 1..45 seconds",
     )
     require(type(model) is str and 1 <= len(model) <= 200, "invalid_input", "Provide a model ID")
     require(
         type(text) is str and 1 <= len(text.strip()) <= 4000,
         "invalid_input",
-        "Request must be1..4000characters",
+        "Request must contain 1..4000 characters",
     )
     prompt = (
         "Translate the user's complete request into a synthetic room lease JSON object. Never issue actions. "

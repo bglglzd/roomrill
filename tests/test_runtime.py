@@ -26,6 +26,39 @@ class DurableRuntime(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.path = self.root / "ledger.sqlite"
 
+    def test_manual_override_and_expiry_do_not_cross_room_boundaries(self):
+        engine = Engine(self.path)
+        engine.initialize(demo=True)
+        engine.create(
+            request(
+                "meeting-call",
+                duration_seconds=10,
+                targets={"light": {"on": True, "brightness": 60}},
+            )
+        )
+        engine.create(
+            request(
+                "studio-call",
+                room="studio",
+                duration_seconds=20,
+                targets={"light": {"on": True, "brightness": 90}},
+            )
+        )
+        studio = engine.state()["rooms"][1]["scopes"]["light"]
+        engine.manual("meeting", "light", {"on": True, "brightness": 45})
+        engine.advance(10)
+        state = engine.state()
+        self.assertEqual(
+            state["rooms"][0]["scopes"]["light"]["device"]["value"], {"on": True, "brightness": 45}
+        )
+        self.assertEqual(state["rooms"][1]["scopes"]["light"]["device"], studio["device"])
+        self.assertEqual(state["rooms"][1]["scopes"]["light"]["winner"]["id"], "studio-call")
+        engine.advance(10)
+        self.assertEqual(
+            engine.state()["rooms"][1]["scopes"]["light"]["device"]["value"],
+            {"on": False, "brightness": 0},
+        )
+
     def test_two_real_cli_writers_preserve_both_requests_and_one_current_winner(self):
         engine = Engine(self.path)
         engine.initialize(demo=True)

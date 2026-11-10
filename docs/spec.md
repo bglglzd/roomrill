@@ -1,8 +1,8 @@
 # Lease rules
 
-Roomrill arbitrates synthetic room light and media state. Requests are immediate-start leases with an owner label, role, priority, duration and restore policy. Member priority is0–50, operator0–100; duration is1–86400seconds. This local tool does not authenticate those role labels as remote users.
+Roomrill arbitrates synthetic room light and media state. Requests are immediate-start leases with an owner label, role, priority, duration and restore policy. Member priority is 0–50, operator 0–100; duration is 1–86,400 seconds. This local tool does not authenticate those role labels as remote users.
 
-Light is one atomic vector: on with brightness1–100, or off with brightness0. Media is playing, paused or stopped. A request can target either scope or both. Each scope chooses its highest-priority eligible lease, breaking ties by the later durable submission sequence. A lease must remain uncancelled, unsuppressed and unexpired. Exact repeated submission IDs are idempotent; changed content under the same ID is refused.
+Light is one atomic vector: on with brightness 1–100, or off with brightness 0. Media is playing, paused or stopped. A request can target either scope or both. Each scope chooses its highest-priority eligible lease, breaking ties by the later durable submission sequence. A lease must remain uncancelled, unsuppressed and unexpired. Exact repeated submission IDs are idempotent; changed content under the same ID is refused.
 
 Manual changes increment the whole scope's device version, even if the value stays equal, and suppress every existing lease on that scope. Unknown external changes do the same without attributing them to a human. Another scope remains independent. A newly approved request may use that newer state as its baseline.
 

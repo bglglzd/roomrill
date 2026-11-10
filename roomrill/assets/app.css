@@ -1380,7 +1380,8 @@ main:focus {
     font-size:10px
   }
   .evidence-list {
-    max-height:580px
+    max-height:none;
+    overflow-y:visible
   }
   .command-item .item-top {
     flex-wrap:wrap

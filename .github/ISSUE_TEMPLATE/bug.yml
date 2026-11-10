@@ -1,0 +1,23 @@
+name: Bug report
+description: Reproduce an incorrect state, command or interface result.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version and platform
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal synthetic reproduction
+      description: Commands or event sequence, including fixture or operational time.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual state
+      description: Include relevant versions, command IDs and refusal or receipt. Remove private paths, credentials and real device/occupant data.
+    validations:
+      required: true

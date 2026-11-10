@@ -1,0 +1,13 @@
+{
+  "id": "call-001",
+  "room": "meeting",
+  "owner": "Local operator",
+  "role": "member",
+  "priority": 30,
+  "duration_seconds": 1200,
+  "restore_policy": "compare",
+  "targets": {
+    "light": {"on": true, "brightness": 70},
+    "media": "paused"
+  }
+}

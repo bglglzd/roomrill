@@ -82,7 +82,7 @@ def value(scope, target):
             (target["on"] and target["brightness"] > 0)
             or (not target["on"] and target["brightness"] == 0),
             "invalid_input",
-            "Off requires brightness0; on requires1..100",
+            "Off requires brightness 0; on requires 1..100",
         )
     return target
 
@@ -160,7 +160,7 @@ def loads(raw):
         raise Error("invalid_input", "Nonfinite JSON number")
 
     try:
-        require(len(raw) <= 65536, "invalid_input", "JSON exceeds64KiB")
+        require(len(raw) <= 65536, "invalid_input", "JSON exceeds 64 KiB")
         result = json.loads(raw, object_pairs_hook=pairs, parse_constant=constant)
         encoded(result)
         return result
