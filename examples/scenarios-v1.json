@@ -1,0 +1,5859 @@
+{
+  "schema_version": "roomrill.authored-acceptance.v1",
+  "set_kind": "fixed_authored_synthetic_acceptance",
+  "authored_on": "2026-11-11",
+  "claims": {
+    "implementation_read": false,
+    "product_execution": false,
+    "results_from_product_outputs": false,
+    "blind_model_accuracy_evidence": false
+  },
+  "fixture_epoch": "2030-01-01T12:00:00Z",
+  "default_initial": {
+    "database": "new independent SQLite file for each case; seed only",
+    "room": "meeting-a",
+    "registered_rooms": [
+      "meeting-a"
+    ],
+    "clock_mode": "fixture",
+    "clock": "2030-01-01T12:00:00Z",
+    "device": {
+      "light": {
+        "value": {
+          "on": false,
+          "brightness": 0
+        },
+        "version": 0
+      },
+      "media": {
+        "value": "stopped",
+        "version": 0
+      }
+    },
+    "observed": {
+      "light": {
+        "value": {
+          "on": false,
+          "brightness": 0
+        },
+        "version": 0
+      },
+      "media": {
+        "value": "stopped",
+        "version": 0
+      }
+    },
+    "link": {
+      "light": true,
+      "media": true
+    },
+    "leases": [],
+    "commands": [],
+    "ownership": {
+      "light": {
+        "open": false
+      },
+      "media": {
+        "open": false
+      }
+    },
+    "automatic_application_receipts": 0,
+    "default_operator_context": {
+      "owner": "fixture-operator",
+      "role": "operator"
+    }
+  },
+  "contract_clarifications": [
+    {
+      "id": "CL01",
+      "source": "Parent task message before original scenario sealing; 2026-11-11",
+      "rule": "Leases start immediately at accepted controller issue time; expires_at=issued_at+duration_seconds. No future-start API."
+    },
+    {
+      "id": "CL02",
+      "source": "Parent task message before original scenario sealing; 2026-11-11",
+      "rule": "Desired and closure commands have a5-second TTL. Application is valid only while now<deadline. A timeout is refused with reason deadline; a currently eligible lease may receive a fresh command."
+    },
+    {
+      "id": "CL03",
+      "source": "Parent task message before original scenario sealing; 2026-11-11",
+      "rule": "Fixture-clock rollback returns clock_rollback and preserves domain state. Operational UTC rollback likewise refuses new mutations; reads remain available. Rejection does not promise an audit append."
+    },
+    {
+      "id": "CL04",
+      "source": "Parent task message before original scenario sealing; 2026-11-11",
+      "rule": "Observed external/unattributed revisions, including same-value revisions not explained by an own acknowledgement, suppress all existing leases on that scope and revoke ownership. Cause remains external_unattributed without invented human attribution."
+    },
+    {
+      "id": "CL05",
+      "source": "Parent task message before original scenario sealing; 2026-11-11",
+      "rule": "A new exact-value winner on proven owned state adopts lease and restore policy through no_op_adoption, preserving baseline/fence and device version. An unowned exact-value target is fulfilled_noop and acquires no ownership or baseline."
+    }
+  ],
+  "global_expected_observations": [
+    "No applied desired target is expired, cancelled, suppressed, superseded, deadline-expired, generation-stale or version-stale at actual application.",
+    "A valid conditional closure is a separate action with a new command ID/deadline and surviving ownership proof. It is not counted as executing an expired desired target.",
+    "No closure overwrites a newer manual or external decision, including same-value revision events.",
+    "Each automatic application has one durable receipt binding unique command ID, scope, deciding lease (or ended lease and closure proof), before/after values, before/after versions and logical time.",
+    "A refused delivery is visible with a reason and creates no successful application receipt. Historical successful receipt replay is permitted but cannot execute again.",
+    "Only actual device writes advance automatic device versions. Every synthetic manual/external event advances its scope version even if values match.",
+    "Fixture time and operational injected-source time are synthetic test inputs, never measured physical latency.",
+    "reopen_process means a separately started process using the same durable SQLite file, not only in-memory object reinstantiation."
+  ],
+  "unresolved_or_nonprescribed": [
+    "When several guards fail simultaneously, the contract does not order refusal reasons. Such cases require a visible reason and zero application; isolated deadline cases require deadline.",
+    "Exact public API method names, JSON output layout, resolver-generation numeric values and receipt IDs are adapter details. Command IDs must remain unique and aliases bind the originals.",
+    "Rejected requests preserve durable domain state. Diagnostic counters/events or read-only process metadata are outside same_domain_state_as.",
+    "This set does not prescribe migrations, retention, large-installation throughput, hardware behavior, a future-start interface or arbitrary-model accuracy."
+  ],
+  "cases": [
+    {
+      "id": "R01",
+      "title": "Compare expiry restores an uninterrupted baseline",
+      "tags": [
+        "expiry",
+        "restoration",
+        "receipts"
+      ],
+      "invariant": "One acknowledged automatic change owns the prior light vector. Expiry closes that ownership through a distinct proved restoration.",
+      "failure_if": "The light stays leased, expiry replays the expired target, or a restoring receipt lacks baseline/version proof.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 1,
+                "deciding_lease_id": "A",
+                "restore": "compare"
+              }
+            },
+            "automatic_receipt": {
+              "kind": "desired",
+              "lease_id": "A",
+              "scope": "light",
+              "before": {
+                "on": false,
+                "brightness": 0
+              },
+              "after": {
+                "on": true,
+                "brightness": 60
+              },
+              "before_version": 0,
+              "after_version": 1
+            }
+          }
+        },
+        {
+          "id": "expire",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "automatic_receipt": {
+              "kind": "closure",
+              "lease_id": "A",
+              "scope": "light",
+              "before": {
+                "on": true,
+                "brightness": 60
+              },
+              "after": {
+                "on": false,
+                "brightness": 0
+              },
+              "before_version": 1,
+              "after_version": 2,
+              "closure_proof_required": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R02",
+      "title": "Leave expiry closes ownership without a write",
+      "tags": [
+        "expiry",
+        "leave"
+      ],
+      "invariant": "Leave preserves the last automatic value while ending ownership.",
+      "failure_if": "Expiry restores the seed or fabricates a device revision.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "leave"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "applied"
+        },
+        {
+          "id": "expire",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "no_device_write_since": "applied"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R03",
+      "title": "Priority interruption preserves the original chain baseline",
+      "tags": [
+        "priority",
+        "overlap",
+        "baseline_chain"
+      ],
+      "invariant": "An eligible loser resumes when its interrupter ends; automatic winner changes retain the original baseline.",
+      "failure_if": "A never resumes, or final closure restores an intermediate automatic value.",
+      "steps": [
+        {
+          "id": "low",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 40
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 40
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "high",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": "B"
+            },
+            "losers": [
+              {
+                "lease_id": "A",
+                "scope": "light",
+                "winner_id": "B",
+                "reason": "lower_priority"
+              }
+            ],
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 2,
+                "deciding_lease_id": "B",
+                "restore": "compare"
+              }
+            }
+          }
+        },
+        {
+          "id": "resume-A",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 40
+                },
+                "version": 3
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 3,
+                "deciding_lease_id": "A",
+                "restore": "compare"
+              }
+            }
+          }
+        },
+        {
+          "id": "close",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 4
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "title": "Same-time ties use persisted submission sequence",
+      "tags": [
+        "tie_sequence",
+        "overlap"
+      ],
+      "invariant": "Equal priority is decided by the later persisted submission even at an identical fixture instant.",
+      "failure_if": "Earlier A wins the tie, or the losing explanation fails to name B.",
+      "steps": [
+        {
+          "id": "first",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 30
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "second",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 70
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "later-wins",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 70
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B"
+            },
+            "sequence_order": [
+              "A",
+              "B"
+            ],
+            "losers": [
+              {
+                "lease_id": "A",
+                "scope": "light",
+                "winner_id": "B",
+                "reason": "later_submission_sequence"
+              }
+            ]
+          }
+        },
+        {
+          "id": "resume-A",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 30
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": "A"
+            }
+          }
+        },
+        {
+          "id": "close",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R05",
+      "title": "Later member loses to higher operator priority",
+      "tags": [
+        "role",
+        "priority"
+      ],
+      "invariant": "Validated numeric priority dominates submission order.",
+      "failure_if": "Priority50 member displaces a still-active priority80 operator.",
+      "steps": [
+        {
+          "id": "operator",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 80,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "member",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 30
+              }
+            },
+            "priority": 50,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "member"
+          }
+        },
+        {
+          "id": "keep-A",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "losers": [
+              {
+                "lease_id": "B",
+                "scope": "light",
+                "winner_id": "A",
+                "reason": "lower_priority"
+              }
+            ]
+          }
+        },
+        {
+          "id": "member-ended",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "A"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R06",
+      "title": "Light interruption leaves media ownership independent",
+      "tags": [
+        "atomic_scopes",
+        "partial_targets",
+        "baseline_chain"
+      ],
+      "invariant": "A two-scope request may lose light while continuing to own media. Scope versions and closures are separate.",
+      "failure_if": "Light-only B changes media or causes media to gain a spurious revision.",
+      "steps": [
+        {
+          "id": "both",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              },
+              "media": "playing"
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-both",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "light-only",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 20
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "interrupt",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 20
+                },
+                "version": 2
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B",
+              "media": "A"
+            }
+          }
+        },
+        {
+          "id": "resume",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "A",
+              "media": "A"
+            }
+          }
+        },
+        {
+          "id": "close",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 4
+              },
+              "media": {
+                "value": "stopped",
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              },
+              "media": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R07",
+      "title": "Manual zero brightness suppresses every old light request",
+      "tags": [
+        "manual",
+        "atomic_light",
+        "suppressed_loser",
+        "partial_scopes"
+      ],
+      "invariant": "Brightness zero means the whole off vector and suppresses both light winner and loser; media remains independent.",
+      "failure_if": "A prior light request returns after manual off, or media is suppressed by a light operation.",
+      "steps": [
+        {
+          "id": "both",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 40
+              },
+              "media": "playing"
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 40
+                },
+                "version": 1
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "higher",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 2
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "manual-zero",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "manual_brightness",
+          "brightness": 0,
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 3
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A",
+                "B"
+              ]
+            },
+            "unsuppressed": {
+              "media": [
+                "A"
+              ]
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        },
+        {
+          "id": "no-old-light",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 3
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": null,
+              "media": "A"
+            }
+          }
+        },
+        {
+          "id": "media-closes",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 3
+              },
+              "media": {
+                "value": "stopped",
+                "version": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R08",
+      "title": "Same-value manual decision defeats automatic restoration",
+      "tags": [
+        "manual",
+        "same_value",
+        "restoration"
+      ],
+      "invariant": "A manual event increments version even if the value is unchanged. Value equality alone never proves ownership.",
+      "failure_if": "Manual60 is treated as a no-op and expiry restores off over it.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "same-value",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "manual_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 60
+          },
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A"
+              ]
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "snapshot",
+          "capture_as": "manual-state"
+        },
+        {
+          "id": "expire",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "no_device_write_since": "manual-state"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R09",
+      "title": "A new lease takes the intervening manual baseline",
+      "tags": [
+        "manual",
+        "new_lease",
+        "baseline"
+      ],
+      "invariant": "A newly confirmed lease can own a newer manual state. Its baseline cannot be the original seed or an older automatic value.",
+      "failure_if": "Suppressed A returns, or B closes to off instead of manual25.",
+      "steps": [
+        {
+          "id": "old",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 50,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "manual",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "manual_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 25
+          },
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "new",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 1,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 3
+              }
+            },
+            "winners": {
+              "light": "B"
+            },
+            "suppressed": {
+              "light": [
+                "A"
+              ]
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "last_ack_version": 3,
+                "deciding_lease_id": "B",
+                "restore": "compare"
+              }
+            }
+          }
+        },
+        {
+          "id": "close-B",
+          "at": "2030-01-01T12:00:07Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 4
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        },
+        {
+          "id": "old-ended",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 4
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "title": "Manual media pause preserves light restoration",
+      "tags": [
+        "manual",
+        "media",
+        "partial_scopes"
+      ],
+      "invariant": "A manual media event revokes media ownership alone.",
+      "failure_if": "Expiry overwrites paused media or fails to close independently owned light.",
+      "steps": [
+        {
+          "id": "both",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              },
+              "media": "playing"
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              },
+              "media": {
+                "value": "playing",
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "pause",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "manual_device_event",
+          "scope": "media",
+          "value": "paused",
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              },
+              "media": {
+                "value": "paused",
+                "version": 2
+              }
+            },
+            "suppressed": {
+              "media": [
+                "A"
+              ]
+            },
+            "unsuppressed": {
+              "light": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "id": "end",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              },
+              "media": {
+                "value": "paused",
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              },
+              "media": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "title": "Offline pending is never an acknowledgement",
+      "tags": [
+        "offline",
+        "pending",
+        "expired_target"
+      ],
+      "invariant": "An offline device cannot acknowledge a queued intention. Reconnect after expiry must not execute that intention.",
+      "failure_if": "A queue label is counted as a write, or reconnect sets60 after expiry.",
+      "steps": [
+        {
+          "id": "offline",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": false
+        },
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "captured_command": {
+              "kind": "desired",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": true,
+                "brightness": 60
+              },
+              "expected_version": 0,
+              "issued_at": "2030-01-01T12:00:00Z",
+              "deadline": "2030-01-01T12:00:05Z"
+            },
+            "pending": {
+              "light": true
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "offline-delivery",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true,
+              "reason_in": [
+                "offline"
+              ]
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "online-after-end",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": true
+        },
+        {
+          "id": "settle",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "automatic_application_receipts": 0,
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        },
+        {
+          "id": "old-delivery",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R12",
+      "title": "Reconnect applies the current winner instead of queue order",
+      "tags": [
+        "offline",
+        "priority",
+        "superseded_command"
+      ],
+      "invariant": "A current resolver winner overrides queue ordering. An eligible loser can resume only after the winner ends.",
+      "failure_if": "Old queued A writes during B ownership or reconnect applies both targets.",
+      "steps": [
+        {
+          "id": "offline",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": false
+        },
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 40
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light"
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 20,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "plan",
+          "capture_command_as": "B-command",
+          "scope": "light"
+        },
+        {
+          "id": "online",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": true
+        },
+        {
+          "id": "reject-old",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            }
+          }
+        },
+        {
+          "id": "current-only",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B"
+            }
+          }
+        },
+        {
+          "id": "resume-A",
+          "at": "2030-01-01T12:00:21Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 40
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": "A"
+            }
+          }
+        },
+        {
+          "id": "close",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R13",
+      "title": "Reconnect observes offline manual change before planning",
+      "tags": [
+        "offline_manual",
+        "observed_version",
+        "restoration"
+      ],
+      "invariant": "Offline device state can differ from the controller's last observation. Reconnect revokes stale ownership before authorizing any target.",
+      "failure_if": "A stale observed version authorizes restoring off over manual25.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "offline",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": false
+        },
+        {
+          "id": "offline-manual",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "manual_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 25
+          },
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 2
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "expire-offline",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "advance_clock",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 2
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "online",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": true
+        },
+        {
+          "id": "reconcile",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 2
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 25
+                },
+                "version": 2
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A"
+              ]
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "winners": {
+              "light": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R14",
+      "title": "Offline same-value manual change prevents loser revival",
+      "tags": [
+        "offline_manual",
+        "same_value",
+        "suppressed_loser"
+      ],
+      "invariant": "A new observed device version suppresses every older lease for that scope, even if the value equals the former winner's value.",
+      "failure_if": "A returns because the controller missed the same-value manual revision.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 40
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 40
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "offline",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": false
+        },
+        {
+          "id": "same-value-offline",
+          "at": "2030-01-01T12:00:03Z",
+          "action": "manual_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 60
+          },
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "online",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": true
+        },
+        {
+          "id": "no-return",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A",
+                "B"
+              ]
+            },
+            "winners": {
+              "light": null
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        },
+        {
+          "id": "all-ended",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R15",
+      "title": "Separate-process reopen preserves active ownership",
+      "tags": [
+        "restart",
+        "durability",
+        "baseline"
+      ],
+      "invariant": "The same SQLite file reopened in another process retains leases, versions, ownership, receipts and logical clock.",
+      "failure_if": "Only an object is reinstantiated, ownership resets, or a second write repeats an acknowledged command.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:04Z",
+          "action": "snapshot",
+          "capture_as": "durable-before"
+        },
+        {
+          "id": "reopen",
+          "at": "2030-01-01T12:00:04Z",
+          "action": "reopen_process",
+          "same_database": true,
+          "expect": {
+            "same_domain_state_as": "durable-before",
+            "process_identity_changed": true,
+            "prior_receipts_preserved": true,
+            "clock": "2030-01-01T12:00:04Z"
+          }
+        },
+        {
+          "id": "resume",
+          "at": "2030-01-01T12:00:04Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 1,
+                "deciding_lease_id": "A",
+                "restore": "compare"
+              }
+            },
+            "no_device_write_since": "durable-before"
+          }
+        },
+        {
+          "id": "expire",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R16",
+      "title": "Expired offline command remains invalid after process restart",
+      "tags": [
+        "restart",
+        "offline",
+        "expired_target"
+      ],
+      "invariant": "Restart retains time and pending-command validity; it does not turn an unapplied expired lease into ownership.",
+      "failure_if": "The restarted process applies60 or restores a baseline that was never acquired.",
+      "steps": [
+        {
+          "id": "offline",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": false
+        },
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "pending",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light"
+        },
+        {
+          "id": "advance",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "advance_clock"
+        },
+        {
+          "id": "reopen",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "reopen_process",
+          "same_database": true,
+          "expect": {
+            "process_identity_changed": true,
+            "clock": "2030-01-01T12:00:06Z",
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            }
+          }
+        },
+        {
+          "id": "online",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": true
+        },
+        {
+          "id": "settle",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "old",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R17",
+      "title": "Cancelling a winner resumes an unsuppressed loser",
+      "tags": [
+        "cancel",
+        "priority",
+        "baseline_chain"
+      ],
+      "invariant": "Cancellation removes only its lease; resolution finds the remaining eligible lease before considering closure.",
+      "failure_if": "Cancelling B closes the chain despite eligible A or erases A.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 30
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 30
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 20,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "cancel-B",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "cancel",
+          "lease_id": "B"
+        },
+        {
+          "id": "resume-A",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 30
+                },
+                "version": 3
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 3,
+                "deciding_lease_id": "A",
+                "restore": "compare"
+              }
+            }
+          }
+        },
+        {
+          "id": "close",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 4
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R18",
+      "title": "Cancellation invalidates a never-applied desired command",
+      "tags": [
+        "cancel",
+        "pending",
+        "no_false_baseline"
+      ],
+      "invariant": "A queued intention has no acknowledged ownership. Cancellation cannot leave an executable target or a fictitious restore action.",
+      "failure_if": "Old A applies after cancellation or closure increments a never-changed device.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light"
+        },
+        {
+          "id": "cancel",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "cancel",
+          "lease_id": "A"
+        },
+        {
+          "id": "old",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "settle",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "automatic_application_receipts": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "R19",
+      "title": "Same target value cannot validate an old resolver generation",
+      "tags": [
+        "generation_fence",
+        "superseded_command",
+        "same_value"
+      ],
+      "invariant": "A stale deciding lease is not current merely because its target equals the new winner's target.",
+      "failure_if": "The superseded A command writes or is silently attributed to B.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light"
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 20,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "plan",
+          "capture_command_as": "B-command",
+          "scope": "light"
+        },
+        {
+          "id": "stale-A",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            }
+          }
+        },
+        {
+          "id": "current-B",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "deliver",
+          "command_ref": "B-command",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "automatic_receipt": {
+              "kind": "desired",
+              "lease_id": "B",
+              "command_ref": "B-command",
+              "before_version": 0,
+              "after_version": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R20",
+      "title": "Duplicate delivery returns a receipt without repeating the write",
+      "tags": [
+        "duplicate_ack",
+        "receipt_replay",
+        "expiry"
+      ],
+      "invariant": "Successful command replay is historical receipt replay, including after closure. It cannot execute again.",
+      "failure_if": "A duplicate increments version, creates another application receipt or returns the device to60 after expiry.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "A-command",
+          "scope": "light"
+        },
+        {
+          "id": "first",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "deliver",
+          "command_ref": "A-command",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "application_receipts_for_command": {
+              "ref": "A-command",
+              "count": 1
+            }
+          }
+        },
+        {
+          "id": "duplicate",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "deliver",
+          "command_ref": "A-command",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "receipt_replay_of": "A-command",
+            "application_receipts_for_command": {
+              "ref": "A-command",
+              "count": 1
+            }
+          }
+        },
+        {
+          "id": "close",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "late-duplicate",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "deliver",
+          "command_ref": "A-command",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "receipt_replay_of": "A-command",
+            "application_receipts_for_command": {
+              "ref": "A-command",
+              "count": 1
+            },
+            "delivery": {
+              "applied_now": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R21",
+      "title": "Manual race defeats an undelivered expected-version command",
+      "tags": [
+        "cas",
+        "manual",
+        "pending"
+      ],
+      "invariant": "Device application validates version and target eligibility in the same transaction. A manual race must not be overwritten.",
+      "failure_if": "The delayed command overwrites manual20 or produces a successful application receipt.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light",
+          "expect": {
+            "captured_command": {
+              "kind": "desired",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": true,
+                "brightness": 60
+              },
+              "expected_version": 0,
+              "issued_at": "2030-01-01T12:00:00Z",
+              "deadline": "2030-01-01T12:00:05Z"
+            }
+          }
+        },
+        {
+          "id": "manual",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "manual_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 20
+          },
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 20
+                },
+                "version": 1
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A"
+              ]
+            }
+          }
+        },
+        {
+          "id": "race-loser",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 20
+                },
+                "version": 1
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "settle",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 20
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R22",
+      "title": "Desired target cannot execute at exact lease expiry",
+      "tags": [
+        "expiry_boundary",
+        "delayed_ack",
+        "expired_target"
+      ],
+      "invariant": "A lease is ineligible at now equal to its expiry, even when no prior reconciliation marked it ended.",
+      "failure_if": "Boundary delivery increments the device or applies the expired desired target.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "queue",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light"
+        },
+        {
+          "id": "boundary",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "settle",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R23",
+      "title": "Ended lease can justify fresh closure without replaying its target",
+      "tags": [
+        "closure_proof",
+        "expired_target_distinction",
+        "deadline"
+      ],
+      "invariant": "Closure has its own proof and new bounded deadline. It may validly restore the baseline after A's desired target has expired.",
+      "failure_if": "All actions after lease expiry are rejected, or the closure is represented as replaying expired60.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "closure-plan",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "plan",
+          "capture_command_as": "A-closure",
+          "scope": "light",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "captured_command": {
+              "kind": "closure",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": false,
+                "brightness": 0
+              },
+              "expected_version": 1,
+              "issued_at": "2030-01-01T12:00:05Z",
+              "deadline": "2030-01-01T12:00:10Z"
+            },
+            "closure_proof": {
+              "ref": "A-closure",
+              "baseline": {
+                "on": false,
+                "brightness": 0
+              },
+              "last_ack_value": {
+                "on": true,
+                "brightness": 60
+              },
+              "last_ack_version": 1,
+              "ended_lease_id": "A",
+              "restore": "compare",
+              "uninterrupted_ownership": true
+            }
+          }
+        },
+        {
+          "id": "closure-delivery",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "deliver",
+          "command_ref": "A-closure",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "automatic_receipt": {
+              "kind": "closure",
+              "lease_id": "A",
+              "command_ref": "A-closure",
+              "before": {
+                "on": true,
+                "brightness": 60
+              },
+              "after": {
+                "on": false,
+                "brightness": 0
+              },
+              "before_version": 1,
+              "after_version": 2,
+              "logical_time": "2030-01-01T12:00:05Z",
+              "closure_proof_required": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R24",
+      "title": "A new winning lease invalidates a queued restoration",
+      "tags": [
+        "stale_restoration",
+        "new_lease_crossing",
+        "baseline_chain"
+      ],
+      "invariant": "A pending closure is invalid once a new winner exists, even before the new winner writes. With no external change, the ownership chain baseline survives.",
+      "failure_if": "A's closure flashes off during B ownership, or B later restores an intermediate60 baseline.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "closure",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "plan",
+          "capture_command_as": "old-closure",
+          "scope": "light"
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "stale-closure",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "deliver",
+          "command_ref": "old-closure",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B"
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            }
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 2,
+                "deciding_lease_id": "B",
+                "restore": "compare"
+              }
+            }
+          }
+        },
+        {
+          "id": "close-B",
+          "at": "2030-01-01T12:00:16Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 3
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R25",
+      "title": "Same-value manual event invalidates queued restoration",
+      "tags": [
+        "stale_restoration",
+        "manual_crossing",
+        "same_value"
+      ],
+      "invariant": "An old closure cannot rely on equality of values after a manual revision; the new version closes ownership.",
+      "failure_if": "Queued closure overwrites the manual60 decision with off.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "closure",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "plan",
+          "capture_command_as": "old-closure",
+          "scope": "light"
+        },
+        {
+          "id": "same-value-manual",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "manual_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 60
+          },
+          "provenance": {
+            "kind": "manual",
+            "actor": "fixture-manual-actor"
+          },
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A"
+              ]
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        },
+        {
+          "id": "stale-closure",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "deliver",
+          "command_ref": "old-closure",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true
+            }
+          }
+        },
+        {
+          "id": "settle",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R26",
+      "title": "Expired closure command needs a fresh safe closure",
+      "tags": [
+        "closure_deadline",
+        "reconnect",
+        "restoration"
+      ],
+      "invariant": "A closure command expires at its own deadline. Reconnect may create a different fresh command if the original ownership proof still survives.",
+      "failure_if": "The expired command executes, or refreshing a safe closure replays an ended desired target.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "closure",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "plan",
+          "capture_command_as": "old-closure",
+          "scope": "light",
+          "expect": {
+            "captured_command": {
+              "kind": "closure",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": false,
+                "brightness": 0
+              },
+              "expected_version": 1,
+              "issued_at": "2030-01-01T12:00:05Z",
+              "deadline": "2030-01-01T12:00:10Z"
+            }
+          }
+        },
+        {
+          "id": "exact-deadline",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "deliver",
+          "command_ref": "old-closure",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true,
+              "reason_in": [
+                "deadline"
+              ]
+            }
+          }
+        },
+        {
+          "id": "offline",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": false
+        },
+        {
+          "id": "online",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "set_link",
+          "scope": "light",
+          "online": true
+        },
+        {
+          "id": "fresh-closure",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "plan",
+          "capture_command_as": "fresh-closure",
+          "scope": "light",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "captured_command": {
+              "kind": "closure",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": false,
+                "brightness": 0
+              },
+              "expected_version": 1,
+              "issued_at": "2030-01-01T12:00:11Z",
+              "deadline": "2030-01-01T12:00:16Z"
+            },
+            "different_command_ids": [
+              "old-closure",
+              "fresh-closure"
+            ]
+          }
+        },
+        {
+          "id": "fresh-delivery",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "deliver",
+          "command_ref": "fresh-closure",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "automatic_receipt": {
+              "kind": "closure",
+              "lease_id": "A",
+              "command_ref": "fresh-closure",
+              "closure_proof_required": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R27",
+      "title": "Already matching unowned state is a fulfilled no-op",
+      "tags": [
+        "no_op",
+        "unowned",
+        "no_false_baseline"
+      ],
+      "invariant": "An unowned match is fulfilled without ownership, baseline acquisition or fabricated write. Expiry cannot restore an invented baseline.",
+      "failure_if": "The no-op increases a version, fabricates an application receipt or claims ownership.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "noop",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 7
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "events": [
+              {
+                "kind": "fulfilled_noop",
+                "lease_id": "A",
+                "scope": "light"
+              }
+            ],
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "noop"
+        },
+        {
+          "id": "end",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 7
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "no_device_write_since": "noop",
+            "automatic_application_receipts": 0
+          }
+        }
+      ],
+      "initial_override": {
+        "device": {
+          "light": {
+            "value": {
+              "on": true,
+              "brightness": 60
+            },
+            "version": 7
+          },
+          "media": {
+            "value": "stopped",
+            "version": 0
+          }
+        },
+        "observed": {
+          "light": {
+            "value": {
+              "on": true,
+              "brightness": 60
+            },
+            "version": 7
+          },
+          "media": {
+            "value": "stopped",
+            "version": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "R28",
+      "title": "Fixture-clock rollback refuses mutation and survives reopen",
+      "tags": [
+        "clock_rollback",
+        "fixture_clock",
+        "durability"
+      ],
+      "invariant": "The declared fixture clock is monotonic and durable. A refused rollback preserves domain state and still permits inspection.",
+      "failure_if": "Time moves backward, state mutates during rejection, or restart forgets the accepted clock.",
+      "steps": [
+        {
+          "id": "create",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 20,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "advance",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "advance_clock"
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "snapshot",
+          "capture_as": "before-rollback"
+        },
+        {
+          "id": "rollback",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "attempt_clock_rollback",
+          "requested_time": "2030-01-01T12:00:04Z",
+          "expect": {
+            "error": "clock_rollback",
+            "same_domain_state_as": "before-rollback",
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        },
+        {
+          "id": "read",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "inspect",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        },
+        {
+          "id": "reopen",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "reopen_process",
+          "same_database": true,
+          "expect": {
+            "process_identity_changed": true,
+            "same_domain_state_as": "before-rollback",
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R29",
+      "title": "Exact duplicate ID preserves original sequence and expiry",
+      "tags": [
+        "idempotent_id",
+        "duration",
+        "durability"
+      ],
+      "invariant": "An exact duplicate returns the durable original record rather than extending duration, incrementing sequence or creating another command.",
+      "failure_if": "Retry extends A from10 to12, changes its sequence or repeats its acknowledged write.",
+      "steps": [
+        {
+          "id": "first",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "advance",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "advance_clock"
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "snapshot",
+          "capture_as": "before-retry"
+        },
+        {
+          "id": "same-request",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "expect": {
+            "idempotent": true,
+            "same_domain_state_as": "before-retry",
+            "lease_fields": {
+              "A": {
+                "expires_at": "2030-01-01T12:00:10Z",
+                "sequence_unchanged": true
+              }
+            },
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "original-expiry",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R30",
+      "title": "Conflicting body cannot reuse an existing stable ID",
+      "tags": [
+        "idempotent_id",
+        "invalid_input",
+        "atomic_rejection"
+      ],
+      "invariant": "Once ID A identifies a body, differing targets or duration are refused without changing any domain record.",
+      "failure_if": "A's body is updated, its expiry changes or rejection partially mutates state.",
+      "steps": [
+        {
+          "id": "first",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "before-conflict"
+        },
+        {
+          "id": "different-target",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "expect": {
+            "error": "id_conflict",
+            "same_domain_state_as": "before-conflict"
+          }
+        },
+        {
+          "id": "different-duration",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 20,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "expect": {
+            "error": "id_conflict",
+            "same_domain_state_as": "before-conflict"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R31",
+      "title": "Invalid coupled light vectors are refused without coercion",
+      "tags": [
+        "invalid_input",
+        "atomic_light",
+        "types"
+      ],
+      "invariant": "Light is a complete valid atomic vector: off/0 or on/integer1..100. Booleans, strings and floats are not coerced to integer brightness.",
+      "failure_if": "Any malformed vector creates a lease, command, receipt or device revision.",
+      "steps": [
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "initial"
+        },
+        {
+          "id": "invalid-vectors",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "reject_requests",
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "bodies": [
+            {
+              "id": "bad-off",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": false,
+                  "brightness": 1
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "bad-on",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 0
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "bad-neg",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": -1
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "bad-high",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 101
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "missing-on",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "brightness": 50
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "missing-brightness",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "bool-brightness",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": true
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "string-brightness",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": "50"
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "float-brightness",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 50.5
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "numeric-on",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": 1,
+                  "brightness": 50
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            }
+          ],
+          "each_expect": {
+            "rejected": true,
+            "error_visible": true,
+            "same_domain_state_as": "initial",
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              },
+              "media": {
+                "value": "stopped",
+                "version": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R32",
+      "title": "Bounds, role and scalar types reject invalid requests",
+      "tags": [
+        "invalid_input",
+        "role",
+        "bounds",
+        "types"
+      ],
+      "invariant": "Role bounds and finite integer inputs are checked before any lease mutation. Validation never coerces strings or booleans.",
+      "failure_if": "Invalid bounds, fake roles or unsupported room/policy/media values enter the domain.",
+      "steps": [
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "initial"
+        },
+        {
+          "id": "invalid-fields",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "reject_requests",
+          "requests": [
+            {
+              "body": {
+                "id": "member-over",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 51,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-member",
+                "role": "member"
+              }
+            },
+            {
+              "body": {
+                "id": "op-over",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 101,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "negative-priority",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": -1,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "string-priority",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": "10",
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "bool-priority",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": true,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "zero-duration",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": 0,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "long-duration",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": 86401,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "fraction-duration",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": 1.5,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "bool-duration",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": true,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "string-duration",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": "10",
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "bad-role",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "administrator"
+              }
+            },
+            {
+              "body": {
+                "id": "bad-room",
+                "room": "unregistered-room",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "bad-media",
+                "room": "meeting-a",
+                "targets": {
+                  "media": "buffering"
+                },
+                "priority": 10,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "bad-policy",
+                "room": "meeting-a",
+                "targets": {
+                  "light": {
+                    "on": true,
+                    "brightness": 60
+                  }
+                },
+                "priority": 10,
+                "duration_seconds": 10,
+                "restore": "always"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            },
+            {
+              "body": {
+                "id": "empty-targets",
+                "room": "meeting-a",
+                "targets": {},
+                "priority": 10,
+                "duration_seconds": 10,
+                "restore": "compare"
+              },
+              "operator_context": {
+                "owner": "fixture-operator",
+                "role": "operator"
+              }
+            }
+          ],
+          "each_expect": {
+            "rejected": true,
+            "error_visible": true,
+            "same_domain_state_as": "initial"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R33",
+      "title": "Inclusive valid priority and duration boundaries remain usable",
+      "tags": [
+        "valid_bounds",
+        "role",
+        "expiry"
+      ],
+      "invariant": "Priority0, member50, operator100, duration1 and duration86400 are accepted as integer boundaries. Fixture days do not represent wall performance.",
+      "failure_if": "Boundary values are rejected or the long lease expires at an incorrect instant.",
+      "steps": [
+        {
+          "id": "minimum",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "MIN",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 0,
+            "duration_seconds": 1,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "member"
+          }
+        },
+        {
+          "id": "apply-min",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "MIN"
+            }
+          }
+        },
+        {
+          "id": "min-expiry",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": null
+            }
+          }
+        },
+        {
+          "id": "long-member",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "submit",
+          "body": {
+            "id": "LONG",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 50
+              }
+            },
+            "priority": 50,
+            "duration_seconds": 86400,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "member"
+          }
+        },
+        {
+          "id": "apply-long",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 50
+                },
+                "version": 3
+              }
+            }
+          }
+        },
+        {
+          "id": "max-operator",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "submit",
+          "body": {
+            "id": "MAX",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 100,
+            "duration_seconds": 1,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "operator-wins",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 4
+              }
+            },
+            "winners": {
+              "light": "MAX"
+            }
+          }
+        },
+        {
+          "id": "member-resumes",
+          "at": "2030-01-01T12:00:03Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 50
+                },
+                "version": 5
+              }
+            },
+            "winners": {
+              "light": "LONG"
+            }
+          }
+        },
+        {
+          "id": "long-expiry",
+          "at": "2030-01-02T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 6
+              }
+            },
+            "winners": {
+              "light": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R34",
+      "title": "Unknown keys and arbitrary executable shapes are refused",
+      "tags": [
+        "invalid_input",
+        "authority_boundary",
+        "unknown_keys"
+      ],
+      "invariant": "Only the bounded lease schema is executable. Owner/role are supplied by operator context, not request or model JSON.",
+      "failure_if": "Unknown keys are discarded silently or entity/service/action data can become device operations.",
+      "steps": [
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "initial"
+        },
+        {
+          "id": "unsupported-shapes",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "reject_requests",
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "bodies": [
+            {
+              "id": "unknown-top",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 60
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare",
+              "unexpected": true
+            },
+            {
+              "id": "body-owner",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 60
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare",
+              "owner": "model-invented-owner"
+            },
+            {
+              "id": "body-role",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 60
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare",
+              "role": "operator"
+            },
+            {
+              "id": "unknown-scope",
+              "room": "meeting-a",
+              "targets": {
+                "lock": "unlocked"
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "nested-unknown",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 60,
+                  "color": "red"
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "entity-service",
+              "room": "meeting-a",
+              "targets": {
+                "entity_id": "light.arbitrary",
+                "service": "turn_on",
+                "action": "call_service"
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare"
+            },
+            {
+              "id": "top-service",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 60
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare",
+              "service": "light.turn_on"
+            },
+            {
+              "id": "future-start",
+              "room": "meeting-a",
+              "targets": {
+                "light": {
+                  "on": true,
+                  "brightness": 60
+                }
+              },
+              "priority": 10,
+              "duration_seconds": 10,
+              "restore": "compare",
+              "starts_at": "2030-01-01T12:00:10Z"
+            }
+          ],
+          "each_expect": {
+            "rejected": true,
+            "error_visible": true,
+            "same_domain_state_as": "initial",
+            "automatic_application_receipts": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "R35",
+      "title": "Duplicate JSON keys are refused even when values match",
+      "tags": [
+        "invalid_input",
+        "json_parser",
+        "duplicate_keys"
+      ],
+      "invariant": "Duplicate detection applies to every JSON object before any typed request is constructed.",
+      "failure_if": "A parser selects first/last duplicate values or accepts an identical duplicate and creates a lease.",
+      "steps": [
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "initial"
+        },
+        {
+          "id": "duplicate-keys",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "reject_raw_json",
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "documents": [
+            "{\"id\":\"D1\",\"id\":\"D2\",\"room\":\"meeting-a\",\"targets\":{\"light\":{\"on\":true,\"brightness\":60}},\"priority\":10,\"duration_seconds\":10,\"restore\":\"compare\"}",
+            "{\"id\":\"D3\",\"room\":\"meeting-a\",\"targets\":{\"light\":{\"on\":true,\"brightness\":60,\"brightness\":60}},\"priority\":10,\"duration_seconds\":10,\"restore\":\"compare\"}",
+            "{\"id\":\"D4\",\"room\":\"meeting-a\",\"targets\":{\"media\":\"paused\",\"media\":\"playing\"},\"priority\":10,\"duration_seconds\":10,\"restore\":\"compare\"}"
+          ],
+          "each_expect": {
+            "rejected": true,
+            "error_visible": true,
+            "same_domain_state_as": "initial"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R36",
+      "title": "Nonfinite JSON numbers never enter durable state",
+      "tags": [
+        "invalid_input",
+        "json_parser",
+        "nonfinite"
+      ],
+      "invariant": "NaN and infinities are refused; numeric overflow cannot silently become a finite duration or priority.",
+      "failure_if": "A nonfinite/overflowing number is accepted, coerced or committed partially.",
+      "steps": [
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "snapshot",
+          "capture_as": "initial"
+        },
+        {
+          "id": "nonfinite",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "reject_raw_json",
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "documents": [
+            "{\"id\":\"N1\",\"room\":\"meeting-a\",\"targets\":{\"light\":{\"on\":true,\"brightness\":60}},\"priority\":10,\"duration_seconds\":NaN,\"restore\":\"compare\"}",
+            "{\"id\":\"N2\",\"room\":\"meeting-a\",\"targets\":{\"light\":{\"on\":true,\"brightness\":60}},\"priority\":Infinity,\"duration_seconds\":10,\"restore\":\"compare\"}",
+            "{\"id\":\"N3\",\"room\":\"meeting-a\",\"targets\":{\"light\":{\"on\":true,\"brightness\":-Infinity}},\"priority\":10,\"duration_seconds\":10,\"restore\":\"compare\"}",
+            "{\"id\":\"N4\",\"room\":\"meeting-a\",\"targets\":{\"light\":{\"on\":true,\"brightness\":60}},\"priority\":10,\"duration_seconds\":1e400,\"restore\":\"compare\"}"
+          ],
+          "each_expect": {
+            "rejected": true,
+            "error_visible": true,
+            "same_domain_state_as": "initial"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R37",
+      "title": "Operational UTC rollback refuses a new mutation while reads work",
+      "tags": [
+        "clock_rollback",
+        "operational_utc",
+        "recovery"
+      ],
+      "invariant": "A synthetic injected UTC source exercises the operational monotonicity guard. It is not a real clock or latency measurement.",
+      "failure_if": "Backward source time permits B, destroys A, prevents inspection or resets the durable high-water time.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        },
+        {
+          "id": "snapshot",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "snapshot",
+          "capture_as": "accepted-time"
+        },
+        {
+          "id": "backward-source-request",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "attempt_mutation_with_utc_source",
+          "source_time": "2030-01-01T12:00:04Z",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          },
+          "expect": {
+            "error": "clock_rollback",
+            "same_domain_state_as": "accepted-time",
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        },
+        {
+          "id": "read-despite-backward-source",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "inspect_with_utc_source",
+          "source_time": "2030-01-01T12:00:04Z",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        },
+        {
+          "id": "reopen",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "reopen_process",
+          "same_database": true,
+          "expect": {
+            "process_identity_changed": true,
+            "same_domain_state_as": "accepted-time",
+            "clock": "2030-01-01T12:00:05Z"
+          }
+        },
+        {
+          "id": "forward-again",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 80
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 5,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "recover",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 80
+                },
+                "version": 2
+              }
+            },
+            "winners": {
+              "light": "B"
+            }
+          }
+        }
+      ],
+      "initial_override": {
+        "clock_mode": "operational_injected_utc"
+      }
+    },
+    {
+      "id": "R38",
+      "title": "Owned no-op successor adopts leave policy without a write",
+      "tags": [
+        "no_op_adoption",
+        "policy_transfer",
+        "leave"
+      ],
+      "invariant": "An owned exact-value winner change transfers deciding lease/policy and preserves the original baseline and fence, without changing the device.",
+      "failure_if": "B fails to adopt policy or its no-op increments version; final expiry restores off despite B's leave policy.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 20,
+            "restore": "leave"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "adopt-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B"
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 1,
+                "deciding_lease_id": "B",
+                "restore": "leave"
+              }
+            },
+            "events": [
+              {
+                "kind": "no_op_adoption",
+                "lease_id": "B",
+                "scope": "light"
+              }
+            ],
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "A-ended",
+          "at": "2030-01-01T12:00:10Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B"
+            },
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "B-ended",
+          "at": "2030-01-01T12:00:21Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "winners": {
+              "light": null
+            },
+            "automatic_application_receipts": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "R39",
+      "title": "Owned no-op successor can adopt compare policy",
+      "tags": [
+        "no_op_adoption",
+        "policy_transfer",
+        "closure_proof"
+      ],
+      "invariant": "A compare successor controls closure after exact-value ownership adoption, even when the last actual device write came from a leave predecessor.",
+      "failure_if": "Closure incorrectly uses A's leave policy or no-op adoption fabricates a device write.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 10,
+            "restore": "leave"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 2,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "adopt-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": true,
+                "baseline": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "last_ack_version": 1,
+                "deciding_lease_id": "B",
+                "restore": "compare"
+              }
+            },
+            "events": [
+              {
+                "kind": "no_op_adoption",
+                "lease_id": "B",
+                "scope": "light"
+              }
+            ],
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "cancel-A",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "cancel",
+          "lease_id": "A"
+        },
+        {
+          "id": "still-B",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "winners": {
+              "light": "B"
+            }
+          }
+        },
+        {
+          "id": "B-end",
+          "at": "2030-01-01T12:00:03Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "automatic_receipt": {
+              "kind": "closure",
+              "lease_id": "B",
+              "before_version": 1,
+              "after_version": 2,
+              "closure_proof_required": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R40",
+      "title": "Unattributed same-value external revision suppresses old leases",
+      "tags": [
+        "external_unattributed",
+        "same_value",
+        "suppressed_loser",
+        "provenance"
+      ],
+      "invariant": "An unexplained observed revision revokes ownership and suppresses all existing scope leases. Its origin stays unknown rather than being assigned a human name.",
+      "failure_if": "A resumes after the external revision or an invented human identity is recorded for the external event.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 30
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 30
+                },
+                "version": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "submit",
+          "body": {
+            "id": "B",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 20,
+            "duration_seconds": 10,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "apply-B",
+          "at": "2030-01-01T12:00:01Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "external-same",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "external_device_event",
+          "scope": "light",
+          "value": {
+            "on": true,
+            "brightness": 60
+          },
+          "provenance": {
+            "kind": "external_unattributed"
+          }
+        },
+        {
+          "id": "observe-external",
+          "at": "2030-01-01T12:00:02Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            },
+            "observed": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            },
+            "suppressed": {
+              "light": [
+                "A",
+                "B"
+              ]
+            },
+            "ownership": {
+              "light": {
+                "open": false
+              }
+            },
+            "events": [
+              {
+                "kind": "external_unattributed",
+                "scope": "light",
+                "human_attribution": null
+              }
+            ]
+          }
+        },
+        {
+          "id": "no-loser-return",
+          "at": "2030-01-01T12:00:11Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            },
+            "winners": {
+              "light": null
+            }
+          }
+        },
+        {
+          "id": "all-ended",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "R41",
+      "title": "A timed-out desired command needs a fresh eligible command",
+      "tags": [
+        "command_deadline",
+        "delayed_ack",
+        "fresh_plan"
+      ],
+      "invariant": "A desired command is invalid at its own5s deadline even while its30s lease is still eligible. A newly planned current command can succeed.",
+      "failure_if": "The expired command executes, or command timeout incorrectly cancels the still-live lease.",
+      "steps": [
+        {
+          "id": "A",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "submit",
+          "body": {
+            "id": "A",
+            "room": "meeting-a",
+            "targets": {
+              "light": {
+                "on": true,
+                "brightness": 60
+              }
+            },
+            "priority": 10,
+            "duration_seconds": 30,
+            "restore": "compare"
+          },
+          "operator_context": {
+            "owner": "fixture-operator",
+            "role": "operator"
+          }
+        },
+        {
+          "id": "first-plan",
+          "at": "2030-01-01T12:00:00Z",
+          "action": "plan",
+          "capture_command_as": "old-A",
+          "scope": "light",
+          "expect": {
+            "captured_command": {
+              "kind": "desired",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": true,
+                "brightness": 60
+              },
+              "expected_version": 0,
+              "issued_at": "2030-01-01T12:00:00Z",
+              "deadline": "2030-01-01T12:00:05Z"
+            }
+          }
+        },
+        {
+          "id": "deadline",
+          "at": "2030-01-01T12:00:05Z",
+          "action": "deliver",
+          "command_ref": "old-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 0
+              }
+            },
+            "winners": {
+              "light": "A"
+            },
+            "delivery": {
+              "applied_now": false,
+              "reason_visible": true,
+              "reason_in": [
+                "deadline"
+              ]
+            },
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "fresh-plan",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "plan",
+          "capture_command_as": "fresh-A",
+          "scope": "light",
+          "expect": {
+            "captured_command": {
+              "kind": "desired",
+              "scope": "light",
+              "lease_id": "A",
+              "value": {
+                "on": true,
+                "brightness": 60
+              },
+              "expected_version": 0,
+              "issued_at": "2030-01-01T12:00:06Z",
+              "deadline": "2030-01-01T12:00:11Z"
+            },
+            "different_command_ids": [
+              "old-A",
+              "fresh-A"
+            ]
+          }
+        },
+        {
+          "id": "fresh-delivery",
+          "at": "2030-01-01T12:00:06Z",
+          "action": "deliver",
+          "command_ref": "fresh-A",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": true,
+                  "brightness": 60
+                },
+                "version": 1
+              }
+            },
+            "automatic_receipt": {
+              "kind": "desired",
+              "lease_id": "A",
+              "command_ref": "fresh-A"
+            }
+          }
+        },
+        {
+          "id": "lease-end",
+          "at": "2030-01-01T12:00:30Z",
+          "action": "settle",
+          "expect": {
+            "device": {
+              "light": {
+                "value": {
+                  "on": false,
+                  "brightness": 0
+                },
+                "version": 2
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
