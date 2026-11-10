@@ -593,7 +593,8 @@ class Engine:
             self._apply(state, command, now)
             return command
 
-        return self._run(operation)
+        # A delivery request attempts that exact ID; replacement planning is separate.
+        return self._run(operation, reconcile=False)
 
     def state(self):
         with self.store.transaction() as state:
