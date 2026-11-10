@@ -85,13 +85,18 @@ def endpoint_url(endpoint):
     return endpoint
 
 
-def propose(text, *, endpoint, model, rooms, key_env=None):
+def propose(text, *, endpoint, model, rooms, key_env=None, deadline_seconds=45):
     require(
         endpoint and model,
         "model_not_configured",
         "Configure a local chat endpoint and model before requesting a draft",
     )
     endpoint_url(endpoint)
+    require(
+        type(deadline_seconds) is int and 1 <= deadline_seconds <= 45,
+        "invalid_input",
+        "Model deadline must be1..45seconds",
+    )
     require(type(model) is str and 1 <= len(model) <= 200, "invalid_input", "Provide a model ID")
     require(
         type(text) is str and 1 <= len(text.strip()) <= 4000,
@@ -145,7 +150,7 @@ def propose(text, *, endpoint, model, rooms, key_env=None):
         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
     )
     try:
-        output, _ = process.communicate(raw, timeout=45)
+        output, _ = process.communicate(raw, timeout=deadline_seconds)
     except subprocess.TimeoutExpired as exc:
         process.kill()
         process.communicate()

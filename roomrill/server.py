@@ -190,9 +190,9 @@ def make_server(engine, *, port=0, endpoint=None, model_id=None, key_env=None):
     return server
 
 
-def serve(engine, **options):
+def serve(engine, *, stop_event=None, **options):
     server = make_server(engine, **options)
-    stop = threading.Event()
+    stop = stop_event if stop_event is not None else threading.Event()
 
     def tick():
         while not stop.wait(1):
@@ -208,7 +208,9 @@ def serve(engine, **options):
         worker.start()
     print(f"http://127.0.0.1:{server.server_port}/", flush=True)
     try:
-        server.serve_forever(poll_interval=0.2)
+        server.timeout = 0.2
+        while not stop.is_set():
+            server.handle_request()
     except KeyboardInterrupt:
         pass
     finally:

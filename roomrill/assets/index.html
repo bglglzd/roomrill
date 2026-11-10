@@ -77,7 +77,7 @@ roomrill demo --serve</code></pre><p>Open the numeric loopback URL printed in th
           <section class="glass compose-panel" aria-labelledby="lease-heading">
             <div class="section-heading"><h2 id="lease-heading">New lease</h2></div>
             <form id="lease-form">
-              <label>Owner<input id="lease-owner" type="text" value="Operator" maxlength="80" autocomplete="off" required data-mutation></label>
+              <label>Owner<input id="lease-owner" type="text" value="Operator" maxlength="64" autocomplete="off" required data-mutation></label>
               <div class="form-pair"><label>Role<select id="lease-role" data-mutation><option value="operator">Operator</option><option value="member">Member</option></select></label><label>Priority<input id="lease-priority" type="number" min="0" max="100" step="1" value="30" required data-mutation></label></div>
               <p class="field-hint" id="role-hint">Operator priority: 0–100. Role labels are local input.</p>
               <div class="form-pair"><label>Duration <span class="label-unit">seconds</span><input id="lease-duration" type="number" min="1" max="86400" step="1" value="120" required data-mutation></label><label>When ended<select id="lease-restore" data-mutation><option value="compare">Restore</option><option value="leave">Leave state</option></select></label></div>
