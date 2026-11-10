@@ -1,0 +1,56 @@
+name: Publish accepted demo
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Published release tag
+        required: true
+        default: v0.1.0
+      manifest_sha256:
+        description: SHA256 of the independently accepted release manifest
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.event.repository.private == false && github.ref == format('refs/tags/{0}', inputs.release_tag)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.release_tag }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+      - name: Download accepted release bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$MANIFEST_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          mkdir "$RUNNER_TEMP/roomrill-release"
+          gh release view "$RELEASE_TAG" --json isDraft,tagName > "$RUNNER_TEMP/roomrill-release/published.json"
+          python -c 'import json,os;from pathlib import Path;r=json.loads((Path(os.environ["RUNNER_TEMP"])/"roomrill-release/published.json").read_text());assert r["isDraft"] is False and r["tagName"] == os.environ["RELEASE_TAG"], "Release is not published at the requested tag"'
+          gh release download "$RELEASE_TAG" --pattern "roomrill-demo-${RELEASE_TAG#v}.zip" --pattern release-manifest.json --dir "$RUNNER_TEMP/roomrill-release"
+          python scripts/prepare-pages.py --manifest "$RUNNER_TEMP/roomrill-release/release-manifest.json" --archive "$RUNNER_TEMP/roomrill-release/roomrill-demo-${RELEASE_TAG#v}.zip" --source-sha "$GITHUB_SHA" --manifest-sha256 "$MANIFEST_SHA256" --out "$RUNNER_TEMP/roomrill-pages"
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: ${{ runner.temp }}/roomrill-pages
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
