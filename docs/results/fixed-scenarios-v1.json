@@ -1,0 +1,1413 @@
+{
+  "schema": "roomrill.fixed-scenarios-public.v1",
+  "set_kind": "fixed_authored_synthetic_acceptance",
+  "authoring": "A separate agent authored the fixed event sequences from the domain contract without reading implementation or executing product outputs during authoring (self-reported). The expectations are unchanged and are now public regression data.",
+  "claims": {
+    "blind_model_accuracy": false,
+    "hardware_safety": false,
+    "customer_usage": false
+  },
+  "input": {
+    "path": "examples/scenarios-v1.json",
+    "sha256": "07697fadfac2669401b58f90345603c48e270221df73c847ebc038a93ac07b23",
+    "seal_manifest_sha256": "9f571fb8e51b6c9ca562e46c648b4c7fbc180efd8fa937880cb24c4487265801",
+    "cases": 41,
+    "ordered_steps": 233
+  },
+  "adapter_mapping": {
+    "room": {
+      "meeting-a": "meeting"
+    },
+    "restore": "restore_policy",
+    "closure_kind": "restore",
+    "receipts": "actual applied command records",
+    "set_link": "room-level Engine.link; this corpus constrains offline light only",
+    "at": "trusted fixture Store clock advance without reconciliation; operational case uses Engine clock injection",
+    "manual_actor": "synthetic case provenance retained, Engine does not store a human identity"
+  },
+  "runs": [
+    {
+      "kind": "earlier_development_wheel",
+      "release_artifact_acceptance": false,
+      "source_sha": "d89016209c01b3e6d70c6cbfa993bbc1db2667a2",
+      "source_dirty": false,
+      "started_at_utc": "2026-11-10T22:58:56.200565+00:00",
+      "finished_at_utc": "2026-11-10T22:59:13.220306+00:00",
+      "environment": {
+        "python": "3.11.15 (main, Jun  2 2026, 22:29:49) [MSC v.1944 64 bit (AMD64)]",
+        "isolated": true,
+        "platform": "Windows-10-10.0.26200-SP0",
+        "machine": "AMD64",
+        "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "sqlite": "3.53.1",
+        "package_version": "0.1.0"
+      },
+      "module_sha256": {
+        "scenarios.py": "e0cacfb9fed8d8702e384d9da887bb8a41d4066527fe9ad47488d97b0f81bd1c",
+        "scenario_worker.py": "e1a6b8ae87316534d46e17dd0d3f13350494bd0a62bb499cd58077f3c7c307d7",
+        "engine.py": "53caae15bc62a211f6e675ddac500d0ad3db807f5ca0d21173767bf68b022731",
+        "store.py": "f0af0ee12a1ed3543c21cf7be3916581417fbeb4600e764ea7e5621b635e64d9",
+        "validation.py": "89ab83c7241a2beaa1e6daed63115d6b8b096f51ee913a49a70464de2ba42f3f"
+      },
+      "passed": true,
+      "passed_cases": 41,
+      "total_cases": 41,
+      "executed_steps": 233,
+      "expected_steps": 233,
+      "failed_cases": [],
+      "metrics": {
+        "unwanted_restorations": 0,
+        "expired_desired_target_executions": 0,
+        "invalid_automatic_applications": 0,
+        "automatic_application_receipts": 70
+      },
+      "worker_processes": 45,
+      "worker_normal_exits": 45,
+      "genuine_process_reopens": 4,
+      "process_reopen_cases": [
+        "R15",
+        "R16",
+        "R28",
+        "R37"
+      ],
+      "wall_seconds": 17.019690700006322,
+      "cases": [
+        {
+          "id": "R01",
+          "title": "Compare expiry restores an uninterrupted baseline",
+          "passed": true,
+          "expected_steps": 3,
+          "executed_steps": 3,
+          "assertions": 31,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R02",
+          "title": "Leave expiry closes ownership without a write",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 9,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R03",
+          "title": "Priority interruption preserves the original chain baseline",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 29,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 4
+          }
+        },
+        {
+          "id": "R04",
+          "title": "Same-time ties use persisted submission sequence",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 17,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R05",
+          "title": "Later member loses to higher operator priority",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 13,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R06",
+          "title": "Light interruption leaves media ownership independent",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 28,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 6
+          }
+        },
+        {
+          "id": "R07",
+          "title": "Manual zero brightness suppresses every old light request",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 33,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 4
+          }
+        },
+        {
+          "id": "R08",
+          "title": "Same-value manual decision defeats automatic restoration",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 15,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R09",
+          "title": "A new lease takes the intervening manual baseline",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 23,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R10",
+          "title": "Manual media pause preserves light restoration",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R11",
+          "title": "Offline pending is never an acknowledgement",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 28,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R12",
+          "title": "Reconnect applies the current winner instead of queue order",
+          "passed": true,
+          "expected_steps": 10,
+          "executed_steps": 10,
+          "assertions": 15,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R13",
+          "title": "Reconnect observes offline manual change before planning",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R14",
+          "title": "Offline same-value manual change prevents loser revival",
+          "passed": true,
+          "expected_steps": 9,
+          "executed_steps": 9,
+          "assertions": 22,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R15",
+          "title": "Separate-process reopen preserves active ownership",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R16",
+          "title": "Expired offline command remains invalid after process restart",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 12,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R17",
+          "title": "Cancelling a winner resumes an unsuppressed loser",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 18,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 4
+          }
+        },
+        {
+          "id": "R18",
+          "title": "Cancellation invalidates a never-applied desired command",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 10,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R19",
+          "title": "Same target value cannot validate an old resolver generation",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 13,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R20",
+          "title": "Duplicate delivery returns a receipt without repeating the write",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 20,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R21",
+          "title": "Manual race defeats an undelivered expected-version command",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 19,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R22",
+          "title": "Desired target cannot execute at exact lease expiry",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 9,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R23",
+          "title": "Ended lease can justify fresh closure without replaying its target",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 34,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R24",
+          "title": "A new winning lease invalidates a queued restoration",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 20,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R25",
+          "title": "Same-value manual event invalidates queued restoration",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 18,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R26",
+          "title": "Expired closure command needs a fresh safe closure",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 34,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R27",
+          "title": "Already matching unowned state is a fulfilled no-op",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 11,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R28",
+          "title": "Fixture-clock rollback refuses mutation and survives reopen",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 12,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R29",
+          "title": "Exact duplicate ID preserves original sequence and expiry",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 13,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R30",
+          "title": "Conflicting body cannot reuse an existing stable ID",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 7,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R31",
+          "title": "Invalid coupled light vectors are refused without coercion",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 70,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R32",
+          "title": "Bounds, role and scalar types reject invalid requests",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 45,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R33",
+          "title": "Inclusive valid priority and duration boundaries remain usable",
+          "passed": true,
+          "expected_steps": 9,
+          "executed_steps": 9,
+          "assertions": 23,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 6
+          }
+        },
+        {
+          "id": "R34",
+          "title": "Unknown keys and arbitrary executable shapes are refused",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 32,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R35",
+          "title": "Duplicate JSON keys are refused even when values match",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 9,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R36",
+          "title": "Nonfinite JSON numbers never enter durable state",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 12,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R37",
+          "title": "Operational UTC rollback refuses a new mutation while reads work",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 18,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R38",
+          "title": "Owned no-op successor adopts leave policy without a write",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 22,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R39",
+          "title": "Owned no-op successor can adopt compare policy",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 25,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R40",
+          "title": "Unattributed same-value external revision suppresses old leases",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R41",
+          "title": "A timed-out desired command needs a fresh eligible command",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 32,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        }
+      ],
+      "artifact": {
+        "name": "roomrill-0.1.0-py3-none-any.whl",
+        "sha256": "ad3c8ff90d27638b42d1f036cda737c538ce9b15a1e81ec1354a1316d307f161",
+        "bytes": 33436,
+        "purpose": "Development integration proof; this is not the eventual release wheel."
+      },
+      "installation": "Development wheel installed without an index into a fresh virtual environment; parent and workers ran with -I outside the source checkout. Five recorded installed module hashes match the wheel and source."
+    },
+    {
+      "kind": "integrated_source_checkpoint",
+      "release_artifact_acceptance": false,
+      "source_sha": "0495e9568e20fe5803b260d23ea9a1f4b15e3ffe",
+      "source_dirty": false,
+      "started_at_utc": "2026-11-10T23:38:28.977489+00:00",
+      "finished_at_utc": "2026-11-10T23:38:43.208590+00:00",
+      "environment": {
+        "python": "3.11.15 (main, Jun  2 2026, 22:29:49) [MSC v.1944 64 bit (AMD64)]",
+        "isolated": false,
+        "platform": "Windows-10-10.0.26200-SP0",
+        "machine": "AMD64",
+        "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+        "sqlite": "3.53.1",
+        "package_version": "0.1.0"
+      },
+      "module_sha256": {
+        "scenarios.py": "e0cacfb9fed8d8702e384d9da887bb8a41d4066527fe9ad47488d97b0f81bd1c",
+        "scenario_worker.py": "e1a6b8ae87316534d46e17dd0d3f13350494bd0a62bb499cd58077f3c7c307d7",
+        "engine.py": "7683f91d9fa2acb49f9471a16d6a7f5d23d7d6fd311251d0e147e1e620035fe7",
+        "store.py": "f0af0ee12a1ed3543c21cf7be3916581417fbeb4600e764ea7e5621b635e64d9",
+        "validation.py": "39117d2af31c11f84b6982d9437e16002e73a2994635fb1ddbe23baf962d8c46"
+      },
+      "passed": true,
+      "passed_cases": 41,
+      "total_cases": 41,
+      "executed_steps": 233,
+      "expected_steps": 233,
+      "failed_cases": [],
+      "metrics": {
+        "unwanted_restorations": 0,
+        "expired_desired_target_executions": 0,
+        "invalid_automatic_applications": 0,
+        "automatic_application_receipts": 70
+      },
+      "worker_processes": 45,
+      "worker_normal_exits": 45,
+      "genuine_process_reopens": 4,
+      "process_reopen_cases": [
+        "R15",
+        "R16",
+        "R28",
+        "R37"
+      ],
+      "wall_seconds": 14.231263500012574,
+      "cases": [
+        {
+          "id": "R01",
+          "title": "Compare expiry restores an uninterrupted baseline",
+          "passed": true,
+          "expected_steps": 3,
+          "executed_steps": 3,
+          "assertions": 31,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R02",
+          "title": "Leave expiry closes ownership without a write",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 9,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R03",
+          "title": "Priority interruption preserves the original chain baseline",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 29,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 4
+          }
+        },
+        {
+          "id": "R04",
+          "title": "Same-time ties use persisted submission sequence",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 17,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R05",
+          "title": "Later member loses to higher operator priority",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 13,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R06",
+          "title": "Light interruption leaves media ownership independent",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 28,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 6
+          }
+        },
+        {
+          "id": "R07",
+          "title": "Manual zero brightness suppresses every old light request",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 33,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 4
+          }
+        },
+        {
+          "id": "R08",
+          "title": "Same-value manual decision defeats automatic restoration",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 15,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R09",
+          "title": "A new lease takes the intervening manual baseline",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 23,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R10",
+          "title": "Manual media pause preserves light restoration",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R11",
+          "title": "Offline pending is never an acknowledgement",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 28,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R12",
+          "title": "Reconnect applies the current winner instead of queue order",
+          "passed": true,
+          "expected_steps": 10,
+          "executed_steps": 10,
+          "assertions": 15,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R13",
+          "title": "Reconnect observes offline manual change before planning",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R14",
+          "title": "Offline same-value manual change prevents loser revival",
+          "passed": true,
+          "expected_steps": 9,
+          "executed_steps": 9,
+          "assertions": 22,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R15",
+          "title": "Separate-process reopen preserves active ownership",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R16",
+          "title": "Expired offline command remains invalid after process restart",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 12,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R17",
+          "title": "Cancelling a winner resumes an unsuppressed loser",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 18,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 4
+          }
+        },
+        {
+          "id": "R18",
+          "title": "Cancellation invalidates a never-applied desired command",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 10,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R19",
+          "title": "Same target value cannot validate an old resolver generation",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 13,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R20",
+          "title": "Duplicate delivery returns a receipt without repeating the write",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 20,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R21",
+          "title": "Manual race defeats an undelivered expected-version command",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 19,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R22",
+          "title": "Desired target cannot execute at exact lease expiry",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 9,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R23",
+          "title": "Ended lease can justify fresh closure without replaying its target",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 34,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R24",
+          "title": "A new winning lease invalidates a queued restoration",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 20,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 3
+          }
+        },
+        {
+          "id": "R25",
+          "title": "Same-value manual event invalidates queued restoration",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 18,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R26",
+          "title": "Expired closure command needs a fresh safe closure",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 34,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R27",
+          "title": "Already matching unowned state is a fulfilled no-op",
+          "passed": true,
+          "expected_steps": 4,
+          "executed_steps": 4,
+          "assertions": 11,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R28",
+          "title": "Fixture-clock rollback refuses mutation and survives reopen",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 12,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R29",
+          "title": "Exact duplicate ID preserves original sequence and expiry",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 13,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R30",
+          "title": "Conflicting body cannot reuse an existing stable ID",
+          "passed": true,
+          "expected_steps": 5,
+          "executed_steps": 5,
+          "assertions": 7,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R31",
+          "title": "Invalid coupled light vectors are refused without coercion",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 70,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R32",
+          "title": "Bounds, role and scalar types reject invalid requests",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 45,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R33",
+          "title": "Inclusive valid priority and duration boundaries remain usable",
+          "passed": true,
+          "expected_steps": 9,
+          "executed_steps": 9,
+          "assertions": 23,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 6
+          }
+        },
+        {
+          "id": "R34",
+          "title": "Unknown keys and arbitrary executable shapes are refused",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 32,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R35",
+          "title": "Duplicate JSON keys are refused even when values match",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 9,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R36",
+          "title": "Nonfinite JSON numbers never enter durable state",
+          "passed": true,
+          "expected_steps": 2,
+          "executed_steps": 2,
+          "assertions": 12,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 0
+          }
+        },
+        {
+          "id": "R37",
+          "title": "Operational UTC rollback refuses a new mutation while reads work",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 18,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R38",
+          "title": "Owned no-op successor adopts leave policy without a write",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 22,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 1
+          }
+        },
+        {
+          "id": "R39",
+          "title": "Owned no-op successor can adopt compare policy",
+          "passed": true,
+          "expected_steps": 7,
+          "executed_steps": 7,
+          "assertions": 25,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R40",
+          "title": "Unattributed same-value external revision suppresses old leases",
+          "passed": true,
+          "expected_steps": 8,
+          "executed_steps": 8,
+          "assertions": 21,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        },
+        {
+          "id": "R41",
+          "title": "A timed-out desired command needs a fresh eligible command",
+          "passed": true,
+          "expected_steps": 6,
+          "executed_steps": 6,
+          "assertions": 32,
+          "failures": [],
+          "metrics": {
+            "unwanted_restorations": 0,
+            "expired_desired_target_executions": 0,
+            "invalid_automatic_applications": 0,
+            "automatic_application_receipts": 2
+          }
+        }
+      ],
+      "execution": "Clean integrated source checkout; this run is not an isolated installed-release-artifact check."
+    }
+  ],
+  "first_valid_development_execution": {
+    "head_reference": "49385ca822d17967f9adae83202e628ce9dffa0b",
+    "dirty_development_checkout": true,
+    "module_sha256": {
+      "scenarios.py": "dcbc8be287efe039f55a2f9911c70d2d087d6e97f3bf3f08a15a80185b621dc9",
+      "scenario_worker.py": "fb5ecc4316b03f7a5bc4c343de4228cf4c8abca07fbdf5cb7c95a9eea80e7307",
+      "engine.py": "14003cc763c2b7d0976670cad48a724769965ef853e8b74e025671550b73392e",
+      "store.py": "f0af0ee12a1ed3543c21cf7be3916581417fbeb4600e764ea7e5621b635e64d9",
+      "validation.py": "89ab83c7241a2beaa1e6daed63115d6b8b096f51ee913a49a70464de2ba42f3f"
+    },
+    "passed_cases": 40,
+    "total_cases": 41,
+    "executed_steps": 233,
+    "expected_steps": 233,
+    "failed_cases": [
+      "R41"
+    ],
+    "r41_failures": [
+      {
+        "step": "fresh-plan",
+        "path": "captured_command.issued_at",
+        "expected": "2030-01-01T12:00:06Z",
+        "actual": "2030-01-01T12:00:05.000000Z",
+        "passed": false
+      },
+      {
+        "step": "fresh-plan",
+        "path": "captured_command.deadline",
+        "expected": "2030-01-01T12:00:11Z",
+        "actual": "2030-01-01T12:00:10.000000Z",
+        "passed": false
+      }
+    ],
+    "cause": "Delivering a timed-out command implicitly queued a replacement at second 5; the authored explicit planning step at second 6 expected issue time 6 and deadline 11.",
+    "fix_commit": "9664508bed5352cc48ee4b9611a5179dc76f9c4c",
+    "resolution": "Exact-ID delivery was separated from planning. Original case bytes and expectations were not changed."
+  },
+  "reproduce_source": "python -m roomrill.scenarios --cases examples/scenarios-v1.json --output reports/new-run",
+  "reproduce_installed": "From outside the source checkout, use the installed environment's Python: python -I -m roomrill.scenarios --cases /path/to/scenarios-v1.json --output /path/to/new-run",
+  "limits": [
+    "These are two executions of the same fixed cases, not 82 independent cases or a combined accuracy score.",
+    "Earlier installed-wheel proof and later integrated-source proof bind different source module hashes. Neither substitutes for final release-artifact acceptance.",
+    "Wall time includes process startup, IPC, inspection and SQLite work; fixture clock intervals are separate synthetic inputs.",
+    "A valid guarded closure after expiry differs from replaying an expired desired target.",
+    "Per-scope offline case checkpoints constrain light; room-wide connectivity is the supported product control.",
+    "Process reopens use new workers against the same ledger, not fresh in-memory engine objects.",
+    "Counts exclude HTTP, UI, corruption, concurrency, live model, Home Assistant and physical-device verification.",
+    "Initial adapter setup failures occurred before product actions; later checker-negative tests are tooling history, not scored cases."
+  ]
+}

@@ -6,7 +6,7 @@ Results describe fixed, agent-authored synthetic simulator workloads. They are n
 
 A separate curator reasoned about 41 event sequences from the contract without reading implementation or executing product outputs during authoring (self-reported). The original [case bytes](../examples/scenarios-v1.json) remain unchanged. These are now public regression cases. [Execution summary and component hashes](results/fixed-scenarios-v1.json).
 
-| Installed-package run | Observed |
+| Fixed scenario result (each run) | Observed |
 | --- | ---: |
 | Cases passed | 41 / 41 |
 | Ordered steps executed | 233 / 233 |
@@ -16,7 +16,7 @@ A separate curator reasoned about 41 event sequences from the contract without r
 | Invalid automatic applications | 0 |
 | Separate worker processes / genuine reopens | 45 / 4 |
 
-The run used an installed wheel outside the checkout, isolated Python parent/worker imports, CPython 3.11.15 and SQLite 3.53.1 on Windows. Its approximately 17-second total includes process startup, IPC, inspection and SQLite work; it is not reconciliation or device latency. A valid guarded closure after expiry is distinct from replaying an expired desired target.
+An earlier development wheel (`d89016209c01b3e6d70c6cbfa993bbc1db2667a2`) was installed offline into a fresh virtual environment and executed outside its checkout with isolated Python parent/worker imports; it completed in 17.020 seconds. A separate clean source run (`0495e9568e20fe5803b260d23ea9a1f4b15e3ffe`) completed in 14.231 seconds with the same case and safety results. Both used CPython 3.11.15 and SQLite 3.53.1 on Windows. The linked summary separates their source and module hashes. The development wheel is not the final release artifact, and these are two runs of the same 41 cases. Total times include process startup, IPC, inspection and SQLite work, not reconciliation or device latency. A valid guarded closure after expiry differs from replaying an expired desired target.
 
 The first valid development run passed 40/41. R41 exposed an extra replacement command queued as a side effect of delivering a timed-out ID: issued at second 5 instead of the explicit plan at second 6. Exact-ID delivery was separated from planning; expectations were not rewritten. The original failed execution is retained, and its mismatch is reported separately in the summary. Initial harness failures and later stricter checker tests are tooling history, not additional scored cases.
 
@@ -30,7 +30,7 @@ Use a new output directory. A mismatch exits nonzero and retains traces. The sou
 
 ## Reconciliation measurement
 
-On an Intel Core i7-12700K, 20 logical CPUs, Windows, CPython 3.11.15 and SQLite 3.53.1, 200 full `Engine.reconcile` calls with 20 active light leases across a two-room ledger took median **8.23 ms**, p95 **9.13 ms**, maximum **11.07 ms**. The timed region includes snapshot validation, encoding and SQLite commit. No network or concurrency was in that region. [Raw samples, workload and source hashes](results/reconciliation-v1.json).
+On an Intel Core i7-12700K, 20 logical CPUs, Windows, CPython 3.11.15 and SQLite 3.53.1, 200 full `Engine.reconcile` calls with 20 active light leases across a two-room ledger took median **8.10 ms**, p95 **9.09 ms**, maximum **12.81 ms**. The timed region includes snapshot validation, encoding and SQLite commit. No network or concurrency was in that region. [Raw samples, workload and source hashes](results/reconciliation-v1.json).
 
 ```sh
 python scripts/benchmark.py --output reports/new-benchmark
