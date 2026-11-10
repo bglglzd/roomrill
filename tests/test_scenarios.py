@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from roomrill.scenarios import Controller, domain, receipts, run
+from roomrill.scenarios import Case, Controller, domain, receipts, run
 
 EPOCH = "2030-01-01T12:00:00Z"
 BODY = {
@@ -67,6 +67,31 @@ class ScenarioProcesses(unittest.TestCase):
         self.assertFalse(unknown["ok"])
         self.assertEqual(domain(before), domain(unknown["raw"]))
 
+    def test_expired_restore_receipt_is_a_safety_failure(self):
+        body = {**BODY, "duration_seconds": 1}
+        self.assertTrue(self.controller.call("submit", body=body, operator_context=OPERATOR)["ok"])
+        self.assertTrue(self.controller.call("settle")["ok"])
+        self.controller.call("time", at="2030-01-01T12:00:01Z")
+        broken = copy.deepcopy(self.controller.call("settle"))
+        restore = next(c for c in broken["raw"]["commands"].values() if c["kind"] == "restore")
+        # Seed corrupt evidence: an acknowledged closure exactly at its deadline.
+        restore["deadline"] = restore["applied_at"]
+        checker = object.__new__(Case)
+        checker.seen_receipts = {
+            c["id"] for c in broken["raw"]["commands"].values() if c["kind"] == "desired"
+        }
+        checker.metrics = {
+            "automatic_application_receipts": 0,
+            "expired_desired_target_executions": 0,
+            "unwanted_restorations": 0,
+            "invalid_automatic_applications": 0,
+        }
+        checker.assertions = []
+        checker.prove_receipts(broken)
+        self.assertEqual(checker.metrics["unwanted_restorations"], 1)
+        self.assertEqual(checker.metrics["invalid_automatic_applications"], 1)
+        self.assertFalse(checker.assertions[-1]["passed"])
+
 
 class ScenarioInstructions(unittest.TestCase):
     def test_unknown_assertion_fails_and_output_cannot_be_overwritten(self):
@@ -89,16 +114,39 @@ class ScenarioInstructions(unittest.TestCase):
                                 "expect": {"unimplemented_property": True},
                             }
                         ],
-                    }
+                    },
+                    {
+                        "id": "T02",
+                        "title": "Missing lease cannot be unsuppressed",
+                        "steps": [
+                            {
+                                "id": "inspect",
+                                "action": "inspect",
+                                "at": EPOCH,
+                                "expect": {"unsuppressed": {"light": ["missing"]}},
+                            }
+                        ],
+                    },
+                    {
+                        "id": "T03",
+                        "title": "Unknown action",
+                        "steps": [{"id": "unknown", "action": "invented_action", "at": EPOCH}],
+                    },
                 ],
             }
             source = base / "cases.json"
             source.write_text(json.dumps(corpus), encoding="utf-8")
             result = run(source, base / "evidence")
             self.assertFalse(result["passed"])
-            self.assertEqual(result["failed_cases"], ["T01"])
+            self.assertEqual(result["failed_cases"], ["T01", "T02", "T03"])
             step = json.loads((base / "evidence/T01/step-01-inspect.json").read_text())
             self.assertIn("Unknown or invalid expectation", step["adapter_error"]["message"])
+            missing = result["cases"][1]["failures"]
+            self.assertEqual(
+                missing[0]["path"], "unsuppressed.light.missing.targeted_lease_present"
+            )
+            unknown = json.loads((base / "evidence/T03/step-01-unknown.json").read_text())
+            self.assertIn("Unknown action", unknown["adapter_error"]["message"])
             original = (base / "evidence/summary.json").read_bytes()
             with self.assertRaises(FileExistsError):
                 run(source, base / "evidence")

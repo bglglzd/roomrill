@@ -418,7 +418,7 @@ class Case:
                     and proof["last_version"] == command["before"]["version"]
                     and proof["last_value"] == command["before"]["value"]
                 )
-                self.metrics["unwanted_restorations"] += int(not closure_valid)
+                self.metrics["unwanted_restorations"] += int(not (valid and closure_valid))
                 valid = valid and closure_valid
             self.metrics["invalid_automatic_applications"] += int(not valid)
             self.check(f"global.receipt.{command_id}.valid", True, bool(valid))
@@ -462,6 +462,11 @@ class Case:
                 for scope, lease_ids in value.items():
                     for lease_id in lease_ids:
                         item = raw["leases"].get(lease_id)
+                        self.check(
+                            f"{key}.{scope}.{lease_id}.targeted_lease_present",
+                            True,
+                            item is not None and scope in item["targets"],
+                        )
                         actual = item is not None and scope in item["suppressed_scopes"]
                         self.check(f"{key}.{scope}.{lease_id}", key == "suppressed", actual)
             elif key == "losers":
@@ -571,7 +576,12 @@ class Case:
                             and item.get("attribution") == "external_unattributed"
                         ):
                             item["kind"] = "external_unattributed"
-                            item["human_attribution"] = item.get("owner", item.get("actor"))
+                            identities = [
+                                item.get(name) for name in ("human_attribution", "owner", "actor")
+                            ]
+                            item["human_attribution"] = next(
+                                (name for name in identities if name is not None), None
+                            )
                         if all(
                             type(item.get(k)) is type(v) and item.get(k) == v
                             for k, v in wanted.items()

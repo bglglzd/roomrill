@@ -17,16 +17,15 @@ from .engine import Engine, initial
 from .validation import Error, iso, loads, require, stamp
 
 ROOMS = {"meeting-a": "meeting"}
-PAYLOAD_KEYS = {"id", "room", "targets", "priority", "duration_seconds", "restore"}
 
 
 def mapped_payload(body):
     """Rename documented vocabulary without discarding untrusted fields."""
     require(type(body) is dict, "invalid_input", "Lease body must be an object")
+    require("restore_policy" not in body, "invalid_input", "Use the authored restore field")
     # Unknown owner/role/other keys reach the real closed product boundary.
     result = copy.deepcopy(body)
     if "restore" in result:
-        require("restore_policy" not in result, "invalid_input", "Conflicting policy fields")
         result["restore_policy"] = result.pop("restore")
     if type(result.get("room")) is str:
         result["room"] = ROOMS.get(result["room"], result["room"])
