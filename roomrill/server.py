@@ -98,6 +98,7 @@ def make_server(engine, *, port=0, endpoint=None, model_id=None, key_env=None):
                 require(
                     supplied is not None
                     and len(supplied) == 1
+                    and supplied[0].isascii()
                     and hmac.compare_digest(supplied[0], token),
                     "token_refused",
                     "Session token required",
@@ -124,7 +125,23 @@ def make_server(engine, *, port=0, endpoint=None, model_id=None, key_env=None):
                 data = loads(raw)
                 path = self.path
                 if path == "/api/leases":
-                    engine.create(data)
+                    keys(
+                        data,
+                        {
+                            "id",
+                            "room",
+                            "owner",
+                            "role",
+                            "priority",
+                            "duration_seconds",
+                            "restore_policy",
+                            "targets",
+                        },
+                    )
+                    engine.submit(
+                        {k: v for k, v in data.items() if k not in ("owner", "role")},
+                        {"owner": data["owner"], "role": data["role"]},
+                    )
                 elif path == "/api/cancel":
                     keys(data, {"id"})
                     engine.cancel(data["id"])

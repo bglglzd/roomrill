@@ -6,7 +6,18 @@ import time
 import uuid
 
 from .store import Store
-from .validation import encoded, identifier, integer, iso, lease, require, stamp, value
+from .validation import (
+    encoded,
+    identifier,
+    integer,
+    iso,
+    keys,
+    lease,
+    lease_payload,
+    require,
+    stamp,
+    value,
+)
 
 TTL = 5
 SCOPES = ("light", "media")
@@ -198,6 +209,14 @@ class Engine:
 
         return self._run(operation, bump=True)
 
+    def submit(self, payload, operator_context):
+        """Keep the proposed fields separate from local operator authority."""
+        keys(operator_context, {"owner", "role"})
+        with self.store.transaction() as state:
+            self._validate(state)
+            lease_payload(payload, state["rooms"])
+        return self.create({**payload, **operator_context})
+
     def cancel(self, lease_id):
         identifier(lease_id)
 
@@ -282,6 +301,11 @@ class Engine:
         self._run(lambda state, now: state.update(automatic_delivery=automatic))
 
     def advance(self, seconds):
+        require(
+            type(seconds) is not int or seconds >= 0,
+            "clock_rollback",
+            "Fixture clock cannot move backwards",
+        )
         integer(seconds, 0, 86400, "Advance seconds")
 
         def operation(state, now):
@@ -577,6 +601,7 @@ class Engine:
             now = stamp(state["clock"]) if state["mode"] == "demo" else self.clock()
             out = copy.deepcopy(state)
         out["now"] = iso(now)
+        selection_now = max(now, stamp(state["clock"]))
         out["health"] = (
             {
                 "code": "clock_rollback",
@@ -593,17 +618,39 @@ class Engine:
                 "cancelled"
                 if item["cancelled"]
                 else "expired"
-                if now >= stamp(item["expires_at"])
+                if selection_now >= stamp(item["expires_at"])
                 else "suppressed"
                 if set(item["targets"]) <= set(item["suppressed_scopes"])
                 else "active"
             )
+            item["resolution"] = {}
+            for scope in item["targets"]:
+                winner = self._winner(state, item["room"], scope, selection_now)
+                reason = (
+                    "winner"
+                    if winner and winner["id"] == item["id"]
+                    else "scope_suppressed"
+                    if scope in item["suppressed_scopes"]
+                    else "cancelled"
+                    if item["cancelled"]
+                    else "expired"
+                    if selection_now >= stamp(item["expires_at"])
+                    else "lower_priority"
+                    if winner and winner["priority"] > item["priority"]
+                    else "later_submission_sequence"
+                    if winner
+                    else "no_eligible_lease"
+                )
+                item["resolution"][scope] = {
+                    "winner_id": winner["id"] if winner else None,
+                    "reason": reason,
+                }
             leases.append(item)
         out["leases"] = sorted(leases, key=lambda item: item["sequence"], reverse=True)
         rooms = []
         for room in out["rooms"].values():
             for scope, slot in room["scopes"].items():
-                winner = self._winner(state, room["id"], scope, now)
+                winner = self._winner(state, room["id"], scope, selection_now)
                 slot["winner"] = copy.deepcopy(winner)
                 slot["pending"] = [
                     copy.deepcopy(c)

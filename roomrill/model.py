@@ -1,6 +1,7 @@
 """A real chat endpoint proposes closed drafts, never executable room actions."""
 
 import ipaddress
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -8,7 +9,48 @@ import sys
 import time
 from urllib.parse import urlsplit
 
-from .validation import Error, draft, encoded, loads, require
+from .validation import Error, draft, loads, require
+
+
+def draft_schema(rooms):
+    return {
+        "oneOf": [
+            {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["room", "targets", "priority", "duration_seconds", "restore_policy"],
+                "properties": {
+                    "room": {"type": "string", "enum": list(rooms)},
+                    "targets": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "minProperties": 1,
+                        "properties": {
+                            "light": {
+                                "type": "object",
+                                "additionalProperties": False,
+                                "required": ["on", "brightness"],
+                                "properties": {
+                                    "on": {"type": "boolean"},
+                                    "brightness": {"type": "integer", "minimum": 0, "maximum": 100},
+                                },
+                            },
+                            "media": {"type": "string", "enum": ["playing", "paused", "stopped"]},
+                        },
+                    },
+                    "priority": {"type": "integer", "minimum": 0, "maximum": 50},
+                    "duration_seconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+                    "restore_policy": {"type": "string", "enum": ["compare", "leave"]},
+                },
+            },
+            {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["error"],
+                "properties": {"error": {"type": "string", "enum": ["needs_clarification"]}},
+            },
+        ]
+    }
 
 
 def endpoint_url(endpoint):
@@ -57,12 +99,15 @@ def propose(text, *, endpoint, model, rooms, key_env=None):
         "Request must be1..4000characters",
     )
     prompt = (
-        "Propose a synthetic room lease as a JSON object only. Never issue actions. "
+        "Translate the user's complete request into a synthetic room lease JSON object. Never issue actions. "
         "Allowed rooms: "
         + ", ".join(rooms)
         + ". Exactly these keys: room,targets,priority,duration_seconds,restore_policy. "
         "targets may contain light {on:boolean,brightness:integer1..100 if on or0 if off} and/or media (playing,paused,stopped). "
-        "priority integer0..50; duration_seconds integer1..86400; restore_policy compare or leave. "
+        "priority is an integer from 0 to 50; duration_seconds is an integer from 1 to 86400. Convert minutes to seconds. "
+        "restore_policy is compare or leave. A complete supported request must produce a draft. "
+        "For example, 'studio media stopped for one minute, priority 10, leave' produces "
+        '{"room":"studio","targets":{"media":"stopped"},"priority":10,"duration_seconds":60,"restore_policy":"leave"}. '
         "Never include owner,role,service calls,device IDs or other keys. If the request lacks a room, duration, "
         'or supported target, return {"error":"needs_clarification"}; unsupported devices also require clarification. '
         "The operator must review every draft. A model response never authorizes a lease."
@@ -71,15 +116,25 @@ def propose(text, *, endpoint, model, rooms, key_env=None):
         "model": model,
         "messages": [{"role": "system", "content": prompt}, {"role": "user", "content": text}],
         "temperature": 0,
+        "seed": 42,
+        "chat_template_kwargs": {"enable_thinking": False},
         "max_tokens": 512,
-        "response_format": {"type": "json_object"},
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "room_lease_draft",
+                "strict": True,
+                "schema": draft_schema(rooms),
+            },
+        },
     }
     config = {
         "endpoint": endpoint,
         "body": body,
         "api_key": os.environ.get(key_env, "") if key_env else "",
     }
-    raw = encoded(config)
+    # Grammar-backed providers can follow schema property order during decoding.
+    raw = json.dumps(config, ensure_ascii=False, allow_nan=False).encode("utf-8")
     require(len(raw) <= 32768, "invalid_input", "Model request exceeds input bound")
     started = time.perf_counter()
     process = subprocess.Popen(

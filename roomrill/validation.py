@@ -140,6 +140,14 @@ def lease(data, rooms):
     return data
 
 
+def lease_payload(data, rooms):
+    """An untrusted proposal cannot supply the operator's owner or role."""
+    keys(data, {"id", "room", "targets", "priority", "duration_seconds", "restore_policy"})
+    identifier(data["id"])
+    draft({k: v for k, v in data.items() if k != "id"}, rooms)
+    return data
+
+
 def loads(raw):
     def pairs(items):
         result = {}
