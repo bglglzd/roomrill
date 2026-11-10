@@ -390,9 +390,9 @@
   }
 
   function renderEvidence() {
-    const commands = ui.state.commands.filter((command) => command.room === ui.roomId).slice().reverse();
+    const commands = ui.state.commands.filter((command) => command.room === ui.roomId);
     renderChanged("command-list", [ui.roomId, commands], () => commands.length ? commands.map(renderCommand) : [node("li", "empty-state", "No commands or receipts for this room.")]);
-    const events = ui.state.events.filter((event) => !event.room || event.room === ui.roomId).slice().reverse();
+    const events = ui.state.events.filter((event) => !event.room || event.room === ui.roomId);
     renderChanged("event-list", [ui.roomId, events], () => events.length ? events.map(renderEvent) : [node("li", "empty-state", "No events for this room.")]);
   }
 

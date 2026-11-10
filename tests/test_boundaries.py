@@ -142,7 +142,7 @@ class SyntheticModelHTTP(unittest.TestCase):
                     self.end_headers()
                     return
                 if slow:
-                    time.sleep(2)
+                    time.sleep(5)
                 raw = (
                     b"x" * 65537
                     if oversized
@@ -259,7 +259,7 @@ class SyntheticModelHTTP(unittest.TestCase):
                 deadline_seconds=1,
             )
         self.assertEqual(failure.exception.code, "model_timeout")
-        self.assertLess(time.monotonic() - started, 4)
+        self.assertLess(time.monotonic() - started, 3)
         self.assertEqual(len(children), 1)
         self.assertIsNotNone(children[0].poll())
 
